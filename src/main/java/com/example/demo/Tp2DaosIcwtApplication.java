@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * Integrantes:
  * PASCUZZI, Guillermo Esteban gpascuzzi@frsf.utn.edu.ar pascuzzige@gmail.com
+ *Simonutti, Gustavo Javier simonutti.gustavo@gmail.com
  * BUSTOS, Rita Elizabeth ritaelizabeth.b@gmail.com 
  * 
  * 

@@ -9,9 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * PASCUZZI, Guillermo Esteban gpascuzzi@frsf.utn.edu.ar pascuzzige@gmail.com
  *Simonutti, Gustavo Javier simonutti.gustavo@gmail.com
  * BUSTOS, Rita Elizabeth ritaelizabeth.b@gmail.com 
- * 
- * 
- * 
+ * GALERA, Franco Tomas fgalera@frsf.utn.edu.ar
  */
 @SpringBootApplication
 public class Tp2DaosIcwtApplication {

@@ -1,4 +1,4 @@
-package com.example.demo;
+package tuti.daos.icwt;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

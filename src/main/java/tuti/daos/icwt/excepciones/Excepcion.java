@@ -2,9 +2,8 @@ package tuti.daos.icwt.excepciones;
 
 public class Excepcion extends Exception {
 
-	/*
-	 * Atributo al que está asociado el error
-	 */
+	// Atributo al que está asociado el error
+	
 	private String atributo;
 
 	private String mensaje;

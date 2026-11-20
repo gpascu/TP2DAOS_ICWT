@@ -43,7 +43,7 @@ public class Incidente {
 
 	// historial de estados, de solo lectura, ordenado cronologicamente
 	@OneToMany(mappedBy = "incidente", cascade = CascadeType.ALL)
-	@OrderBy("fechaHora ASC")
+	@OrderBy("fechaHora ASC, id ASC")
 	private List<HistorialEstadoIncidente> historial = new ArrayList<HistorialEstadoIncidente>();
 
 	public Long getId() {
@@ -108,6 +108,12 @@ public class Incidente {
 
 	public void setEstado(EstadoIncidente estado) {
 		this.estado = estado;
+	}
+
+	// Usamos la misma fecha para el cambio y su historial, incluso al resolver con S04.
+	public void registrarCambioEstado(EstadoIncidente nuevoEstado, LocalDateTime fechaHora) {
+		historial.add(new HistorialEstadoIncidente(this, estado, nuevoEstado, fechaHora));
+		estado = nuevoEstado;
 	}
 
 	public List<HistorialEstadoIncidente> getHistorial() {

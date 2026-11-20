@@ -31,6 +31,7 @@ import tuti.daos.icwt.entidades.Factura;
 import tuti.daos.icwt.error.ErrorAtributo;
 import tuti.daos.icwt.excepciones.Excepcion;
 import tuti.daos.icwt.presentacion.contratos.ContratoRestController;
+import tuti.daos.icwt.presentacion.pagos.PagoRestController;
 import tuti.daos.icwt.servicios.FacturaService;
 
 // Facturas (S01): emision, consulta y anulacion de facturas de alquiler
@@ -127,13 +128,11 @@ public class FacturaRestController {
 					.getById(pojo.getContrato().getId())).withRel("contrato");
 			dto.add(contratoLink);
 
-			// link al pago asociado, unicamente cuando existe IMPORTANTE: RECORDAR DE MODIFICARLO A MEDIDA QUE AVANCE EL PROYECTO PORQUE ESPERAMOS EL PAGO CONTROLLER
+			// link al pago asociado, unicamente cuando existe
 			if (pojo.getPago() != null) {
-			    String href = ServletUriComponentsBuilder.fromCurrentContextPath()
-			            .path("/pagos/{id}")
-			            .buildAndExpand(pojo.getPago().getId())
-			            .toUriString();
-			    dto.add(Link.of(href).withRel("pago"));
+				Link pagoLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PagoRestController.class)
+						.getById(pojo.getPago().getId())).withRel("pago");
+				dto.add(pagoLink);
 			}
 
 			return dto;

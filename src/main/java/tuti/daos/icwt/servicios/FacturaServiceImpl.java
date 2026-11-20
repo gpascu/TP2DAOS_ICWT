@@ -14,6 +14,7 @@ import tuti.daos.icwt.entidades.Contrato;
 import tuti.daos.icwt.entidades.EstadoContrato;
 import tuti.daos.icwt.entidades.EstadoFactura;
 import tuti.daos.icwt.entidades.Factura;
+import tuti.daos.icwt.entidades.Pago;
 import tuti.daos.icwt.excepciones.Excepcion;
 import tuti.daos.icwt.presentacion.facturas.FacturaDTO;
 
@@ -205,6 +206,18 @@ public class FacturaServiceImpl implements FacturaService {
 
         // Guarda el cambio en la base de datos.
         repo.save(f);
+    }
+
+    @Override
+    public Optional<Factura> getByIdParaPago(Long id) {
+        return repo.findParaPagoById(id);
+    }
+
+    @Override
+    public void marcarPagada(Factura factura, Pago pago) {
+        factura.setPago(pago);
+        factura.setEstado(EstadoFactura.PAGADA);
+        repo.save(factura);
     }
 
     // Calcula el vencimiento; si el día indicado no existe en ese mes, usa el último día.

@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import tuti.daos.icwt.entidades.EstadoFactura;
 import tuti.daos.icwt.entidades.Factura;
+import tuti.daos.icwt.entidades.Pago;
 import tuti.daos.icwt.excepciones.Excepcion;
 import tuti.daos.icwt.presentacion.facturas.FacturaDTO;
 
@@ -22,4 +23,9 @@ List<Factura> listar(Long idContrato, String periodo, EstadoFactura estado);
 
 //Anula la factura con el ID indicado. 
 void anular(Long id) throws Excepcion;
+
+Optional<Factura> getByIdParaPago(Long id);
+
+//Única forma de dejar una factura pagada. Solo la usa S02, dentro de la transacción del pago.
+void marcarPagada(Factura factura, Pago pago);
 }

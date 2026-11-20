@@ -1,0 +1,287 @@
+{
+  "info": {
+    "_postman_id": "e8420e44-1f81-43a8-9135-f6aa62023970",
+    "name": "TP2 DAOS - S04 Informes de resolucion - 6 casos",
+    "description": "Ejecutar en orden. Requisitos: Spring Boot localhost:8083, MySQL, y un incidente EN_PROCESO. Configurar incidenteIdPreparado con su ID. El caso 01 resuelve el incidente; para repetir toda la colección preparar otro incidente EN_PROCESO o reabrirlo. Casos diseñados, no ejecutados en Postman.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "60322539",
+    "_collection_link": "https://go.postman.co/collection/60322539-e8420e44-1f81-43a8-9135-f6aa62023970?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "01 - Crear informe exitoso",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', function () { pm.response.to.have.status(201); });\nconst loc = pm.response.headers.get('Location') || '';\npm.test('Location tiene ID', function () { pm.expect(loc).to.match(/\\/informes-resolucion\\/\\d+$/); });\nconst m = loc.match(/\\/informes-resolucion\\/(\\d+)$/);\nif (m) pm.collectionVariables.set('informeIdCreado',m[1]);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"incidenteId\": {{incidenteIdPreparado}},\n  \"descripcionTrabajo\": \"Reparacion verificada con Postman\",\n  \"costo\": 15000,\n  \"observaciones\": \"Prueba reproducible S04\",\n  \"responsable\": \"Tecnico de prueba\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/informes-resolucion",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "informes-resolucion"
+          ]
+        },
+        "description": "Requiere incidenteIdPreparado existente y EN_PROCESO. Cambia el incidente a RESUELTO."
+      },
+      "response": []
+    },
+    {
+      "name": "02 - Consultar informe por identificador",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });\npm.test('ID consultado coincide', function () { pm.expect(String(pm.response.json().id)).to.eql(pm.collectionVariables.get('informeIdCreado')); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/informes-resolucion/{{informeIdCreado}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "informes-resolucion",
+            "{{informeIdCreado}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "03 - Listado filtrado por incidente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });\nconst a=pm.response.json();\npm.test('Listado contiene informe creado',function(){pm.expect(a).to.be.an('array');pm.expect(a.some(x=>String(x.id)===pm.collectionVariables.get('informeIdCreado'))).to.eql(true);});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/informes-resolucion?incidenteId={{incidenteIdPreparado}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "informes-resolucion"
+          ],
+          "query": [
+            {
+              "key": "incidenteId",
+              "value": "{{incidenteIdPreparado}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "04 - Datos invalidos: costo negativo",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', function () { pm.response.to.have.status(400); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"incidenteId\": {{incidenteIdPreparado}},\n  \"descripcionTrabajo\": \"Reparacion verificada con Postman\",\n  \"costo\": -1500,\n  \"observaciones\": \"Prueba reproducible S04\",\n  \"responsable\": \"Tecnico de prueba\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/informes-resolucion",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "informes-resolucion"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "05 - Recurso inexistente: incidente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', function () { pm.response.to.have.status(404); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"incidenteId\": 999999999,\n  \"descripcionTrabajo\": \"Reparacion verificada con Postman\",\n  \"costo\": 15000,\n  \"observaciones\": \"Prueba reproducible S04\",\n  \"responsable\": \"Tecnico de prueba\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/informes-resolucion",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "informes-resolucion"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "06 - Conflicto: incidente ya resuelto",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', function () { pm.response.to.have.status(409); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"incidenteId\": {{incidenteIdPreparado}},\n  \"descripcionTrabajo\": \"Reparacion verificada con Postman\",\n  \"costo\": 15000,\n  \"observaciones\": \"Prueba reproducible S04\",\n  \"responsable\": \"Tecnico de prueba\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/informes-resolucion",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "informes-resolucion"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8083",
+      "type": "string"
+    },
+    {
+      "key": "incidenteIdPreparado",
+      "value": "3",
+      "type": "string"
+    },
+    {
+      "key": "informeIdCreado",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

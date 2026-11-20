@@ -1,3 +1,4 @@
+
 package tuti.daos.icwt.accesoDatos;
 
 import java.util.List;
@@ -15,7 +16,6 @@ import tuti.daos.icwt.entidades.EstadoIncidente;
 import tuti.daos.icwt.entidades.Incidente;
 import tuti.daos.icwt.entidades.PrioridadIncidente;
 
-//Repositorio encargado de las operaciones de acceso a datos de la entidad Incidente.
 @Repository
 public interface IIncidenteRepo extends JpaRepository<Incidente, Long> {
 

@@ -1,0 +1,936 @@
+{
+  "info": {
+    "name": "HogarYA · Actividad 02 · S03 Incidentes",
+    "description": "Ejecutar en orden sobre la API de prueba. La preparación crea sus propios contratos por HTTP. Usar una base descartable porque se generan datos de prueba cada vez.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8083",
+      "type": "string"
+    },
+    {
+      "key": "inexistenteId",
+      "value": "999999999",
+      "type": "string"
+    },
+    {
+      "key": "contratoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "contratoVencidoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "incidenteId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "fechaInicioPrueba",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "fechaHoraAlta",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "contratoIdDecimal",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Preparación 1. Crear contrato vigente",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/contratos",
+        "description": "Prepara un contrato dedicado a la prueba y obtiene su ID desde Location.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"propietario\": \"Propietario Prueba S03\",\n  \"inquilino\": \"Inquilino Prueba S03\",\n  \"direccionPropiedad\": \"Calle Prueba S03 123\",\n  \"fechaInicio\": \"{{fechaInicioPrueba}}\",\n  \"duracionMeses\": 12,\n  \"importeMensual\": 350000,\n  \"diaVencimiento\": 10,\n  \"descripcion\": \"Dato de prueba de la Actividad 02\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const hoy = new Date();",
+              "const fechaLocal = [",
+              "    hoy.getFullYear(),",
+              "    String(hoy.getMonth() + 1).padStart(2, \"0\"),",
+              "    String(hoy.getDate()).padStart(2, \"0\")",
+              "].join(\"-\");",
+              "pm.collectionVariables.set(\"fechaInicioPrueba\", fechaLocal);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 201\", pm.response.code === 201);",
+              "if (pm.response.code === 201) {",
+              "const location = pm.response.headers.get(\"Location\") || \"\";",
+              "const id = location.split(\"/\").pop();",
+              "marca(\"Location contiene el ID del contrato\", /^[1-9][0-9]*$/.test(id));",
+              "pm.collectionVariables.set(\"contratoId\", id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Preparación 2. Crear contrato activo vencido",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/contratos",
+        "description": "Prepara un contrato dedicado a la prueba y obtiene su ID desde Location.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"propietario\": \"Propietario Prueba S03\",\n  \"inquilino\": \"Inquilino Prueba S03\",\n  \"direccionPropiedad\": \"Calle Prueba S03 123\",\n  \"fechaInicio\": \"2000-01-01\",\n  \"duracionMeses\": 1,\n  \"importeMensual\": 350000,\n  \"diaVencimiento\": 10,\n  \"descripcion\": \"Dato de prueba de la Actividad 02\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 201\", pm.response.code === 201);",
+              "if (pm.response.code === 201) {",
+              "const location = pm.response.headers.get(\"Location\") || \"\";",
+              "const id = location.split(\"/\").pop();",
+              "marca(\"Location contiene el ID del contrato\", /^[1-9][0-9]*$/.test(id));",
+              "pm.collectionVariables.set(\"contratoVencidoId\", id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01. Alta de incidente",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes",
+        "description": "El sistema genera el ID, la fecha y el estado ABIERTO. Guarda el ID para los casos siguientes.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"contratoId\": {{contratoId}},\n  \"titulo\": \"Pérdida en la cocina\",\n  \"descripcion\": \"Sale agua debajo de la pileta.\",\n  \"categoria\": \"PLOMERIA\",\n  \"prioridad\": \"MEDIA\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 201\", pm.response.code === 201);",
+              "if (pm.response.code === 201) {",
+              "const incidente = pm.response.json();",
+              "marca(\"Incidente abierto y con fecha\", incidente.estado === \"ABIERTO\" && !!incidente.fechaHoraAlta);",
+              "marca(\"Location apunta al incidente\", pm.response.headers.get(\"Location\") === incidente._links.self.href);",
+              "pm.collectionVariables.set(\"incidenteId\", incidente.id);",
+              "pm.collectionVariables.set(\"fechaHoraAlta\", incidente.fechaHoraAlta);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Consulta por ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes/{{incidenteId}}",
+        "description": "Devuelve el incidente creado y sus enlaces."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 200\", pm.response.code === 200);",
+              "if (pm.response.code === 200) {",
+              "const incidente = pm.response.json();",
+              "const id = pm.collectionVariables.get(\"incidenteId\");",
+              "marca(\"Es el incidente creado\", String(incidente.id) === String(id));",
+              "marca(\"Tiene los enlaces de detalle\", [\"self\", \"contrato\", \"informes\", \"historial\"]",
+              "    .every(rel => !!incidente._links[rel].href));",
+              "marca(\"El enlace a informes filtra por este incidente\",",
+              "    incidente._links.informes.href.endsWith(\"/informes-resolucion?incidenteId=\" + id));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Listado filtrado",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes?contratoId={{contratoId}}&estado=ABIERTO&categoria=PLOMERIA&prioridad=MEDIA",
+        "description": "Combina los cuatro filtros. Incluye el incidente recién creado."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 200\", pm.response.code === 200);",
+              "if (pm.response.code === 200) {",
+              "const respuesta = pm.response.json();",
+              "const filas = respuesta._embedded.incidentes;",
+              "const contratoId = pm.collectionVariables.get(\"contratoId\");",
+              "const id = pm.collectionVariables.get(\"incidenteId\");",
+              "marca(\"Incluye el incidente creado\", filas.some(i => String(i.id) === String(id)));",
+              "marca(\"Todos cumplen los filtros\", filas.every(i => String(i.contratoId) === String(contratoId)",
+              "    && i.estado === \"ABIERTO\" && i.categoria === \"PLOMERIA\" && i.prioridad === \"MEDIA\"));",
+              "marca(\"Self conserva los filtros\", respuesta._links.self.href.includes(\"estado=ABIERTO\"));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Datos obligatorios inválidos",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes",
+        "description": "Un título de espacios se rechaza y no da de alta otro incidente.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"contratoId\": {{contratoId}},\n  \"titulo\": \"   \",\n  \"descripcion\": \"Sale agua debajo de la pileta.\",\n  \"categoria\": \"PLOMERIA\",\n  \"prioridad\": \"MEDIA\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 400\", pm.response.code === 400);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Incidente inexistente",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes/{{inexistenteId}}",
+        "description": "Un ID de incidente que no existe devuelve 404."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 404\", pm.response.code === 404);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Contrato vencido",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes",
+        "description": "Aunque su estado sea ACTIVO, un contrato vencido no permite dar de alta un incidente.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"contratoId\": {{contratoVencidoId}},\n  \"titulo\": \"Pérdida en la cocina\",\n  \"descripcion\": \"Sale agua debajo de la pileta.\",\n  \"categoria\": \"PLOMERIA\",\n  \"prioridad\": \"MEDIA\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 409\", pm.response.code === 409);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Historial del alta",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes/{{incidenteId}}/historial",
+        "description": "La única entrada registra el alta, con estado anterior vacío y la misma fecha del incidente."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 200\", pm.response.code === 200);",
+              "if (pm.response.code === 200) {",
+              "const entradas = pm.response.json()._embedded.historial;",
+              "marca(\"Una sola entrada de alta\", entradas.length === 1 && entradas[0].estadoAnterior == null",
+              "    && entradas[0].estadoNuevo === \"ABIERTO\");",
+              "marca(\"Coincide con la fecha de alta\", entradas[0].fechaHora === pm.collectionVariables.get(\"fechaHoraAlta\"));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08. Iniciar atención",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes/{{incidenteId}}/estado",
+        "description": "Pasa de ABIERTO a EN_PROCESO.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"estado\": \"EN_PROCESO\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 200\", pm.response.code === 200);",
+              "if (pm.response.code === 200) {",
+              "marca(\"Quedó en proceso\", pm.response.json().estado === \"EN_PROCESO\");",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. Rechazar resolución desde S03",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes/{{incidenteId}}/estado",
+        "description": "Desde EN_PROCESO, la resolución requiere S04.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"estado\": \"RESUELTO\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 409\", pm.response.code === 409);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Verificar que el rechazo no dejó cambios",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes/{{incidenteId}}/historial",
+        "description": "Conserva ABIERTO → EN_PROCESO como último cambio y no agrega RESUELTO."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 200\", pm.response.code === 200);",
+              "if (pm.response.code === 200) {",
+              "const entradas = pm.response.json()._embedded.historial;",
+              "marca(\"Solo hay alta e inicio\", entradas.length === 2 && entradas[0].estadoNuevo === \"ABIERTO\"",
+              "    && entradas[1].estadoAnterior === \"ABIERTO\" && entradas[1].estadoNuevo === \"EN_PROCESO\");",
+              "marca(\"El historial está ordenado\", new Date(entradas[0].fechaHora) <= new Date(entradas[1].fechaHora));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Verificar estado tras el rechazo",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes/{{incidenteId}}",
+        "description": "El incidente sigue EN_PROCESO."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 200\", pm.response.code === 200);",
+              "if (pm.response.code === 200) {",
+              "marca(\"El estado no cambió\", pm.response.json().estado === \"EN_PROCESO\");",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Cancelar",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes/{{incidenteId}}/estado",
+        "description": "Permite cancelar un incidente en proceso.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"estado\": \"CANCELADO\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 200\", pm.response.code === 200);",
+              "if (pm.response.code === 200) {",
+              "marca(\"Quedó cancelado\", pm.response.json().estado === \"CANCELADO\");",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. Cancelado es terminal",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes/{{incidenteId}}/estado",
+        "description": "El estado CANCELADO no permite volver a iniciar la atención.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"estado\": \"EN_PROCESO\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 409\", pm.response.code === 409);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "14. Contrato inexistente",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes",
+        "description": "Un alta con contrato inexistente devuelve 404.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"contratoId\": {{inexistenteId}},\n  \"titulo\": \"Pérdida en la cocina\",\n  \"descripcion\": \"Sale agua debajo de la pileta.\",\n  \"categoria\": \"PLOMERIA\",\n  \"prioridad\": \"MEDIA\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 404\", pm.response.code === 404);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "15. Estado desconocido",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes/{{incidenteId}}/estado",
+        "description": "Un valor ajeno al enum falla como dato inválido.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"estado\": \"TERMINADO\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 400\", pm.response.code === 400);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "16. Verificar cantidad de altas",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes?contratoId={{contratoId}}",
+        "description": "El contrato de prueba conserva únicamente el incidente válido."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 200\", pm.response.code === 200);",
+              "if (pm.response.code === 200) {",
+              "const filas = pm.response.json()._embedded.incidentes;",
+              "marca(\"Hay una sola alta\", filas.length === 1 && filas[0].estado === \"CANCELADO\");",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "17. Verificar que el contrato vencido no tiene altas",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes?contratoId={{contratoVencidoId}}",
+        "description": "El conflicto de vigencia no dejó incidentes relacionados."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 200\", pm.response.code === 200);",
+              "if (pm.response.code === 200) {",
+              "const respuesta = pm.response.json();",
+              "const filas = respuesta._embedded && respuesta._embedded.incidentes || [];",
+              "marca(\"El listado está vacío\", filas.length === 0 && !!respuesta._links.self.href);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "18. Rechazar un ID de contrato decimal",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes",
+        "description": "Un ID con parte decimal no se puede convertir en un ID entero.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"contratoId\": {{contratoIdDecimal}},\n  \"titulo\": \"Pérdida en la cocina\",\n  \"descripcion\": \"Sale agua debajo de la pileta.\",\n  \"categoria\": \"PLOMERIA\",\n  \"prioridad\": \"MEDIA\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"contratoIdDecimal\", pm.collectionVariables.get(\"contratoId\") + \".7\");"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 400\", pm.response.code === 400);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "19. Rechazar un título numérico",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes",
+        "description": "El título debe ser una cadena JSON.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"contratoId\": {{contratoId}},\n  \"titulo\": 123,\n  \"descripcion\": \"Sale agua debajo de la pileta.\",\n  \"categoria\": \"PLOMERIA\",\n  \"prioridad\": \"MEDIA\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 400\", pm.response.code === 400);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "20. Rechazar una descripción booleana",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes",
+        "description": "La descripción debe ser una cadena JSON.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"contratoId\": {{contratoId}},\n  \"titulo\": \"Pérdida en la cocina\",\n  \"descripcion\": false,\n  \"categoria\": \"PLOMERIA\",\n  \"prioridad\": \"MEDIA\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 400\", pm.response.code === 400);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "21. Rechazar un estado numérico",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/hal+json, application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incidentes/{{incidenteId}}/estado",
+        "description": "El estado debe indicarse por su nombre.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"estado\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "function marca(nombre, condicion) { pm.test(nombre, () => pm.expect(condicion).to.eql(true)); }",
+              "marca(\"HTTP 400\", pm.response.code === 400);"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

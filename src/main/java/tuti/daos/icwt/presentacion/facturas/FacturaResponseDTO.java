@@ -4,11 +4,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.core.Relation;
 
 import tuti.daos.icwt.entidades.EstadoFactura;
 import tuti.daos.icwt.entidades.Factura;
 
 /** Devuelve los datos de una factura y permite agregar enlaces a la factura, al contrato y al pago si existe. */
+@Relation(collectionRelation = "facturas", itemRelation = "factura")
 public class FacturaResponseDTO extends RepresentationModel<FacturaResponseDTO> {
 
     private Long id;

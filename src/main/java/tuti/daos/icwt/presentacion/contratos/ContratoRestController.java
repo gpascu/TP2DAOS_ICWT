@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
@@ -43,16 +44,13 @@ public class ContratoRestController {
     /** Lista todos los contratos. Ejemplo: GET http://localhost:8083/contratos */
     @GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE })
     @Operation(summary = "Lista todos los contratos registrados")
-    public ResponseEntity<List<ContratoResponseDTO>> listar() throws Excepcion {
-        List<ContratoResponseDTO> dtos = new ArrayList<ContratoResponseDTO>();
-
-        // Convierte cada contrato en una respuesta con sus datos y enlaces.
+    public ResponseEntity<CollectionModel<ContratoResponseDTO>> listar() throws Excepcion {
+        List<ContratoResponseDTO> dtos = new ArrayList<>();
         for (Contrato c : service.getAll()) {
             dtos.add(buildResponseBody(c));
         }
-
-        // Devuelve la lista con el código 200.
-        return new ResponseEntity<List<ContratoResponseDTO>>(dtos, HttpStatus.OK);
+        Link selfLink = Link.of(ServletUriComponentsBuilder.fromCurrentRequest().toUriString()).withSelfRel();
+        return ResponseEntity.ok(CollectionModel.of(dtos, selfLink));
     }
 
     // Busca un contrato por ID. Ejemplo: get http://localhost:8083/contratos/1 
@@ -68,23 +66,24 @@ public class ContratoRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
-    //Crea un contrato con los datos JSON recibidos. Ejemplo: post http://localhost:8083/contratos 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+ // Crea un contrato con los datos JSON recibidos. Ejemplo: POST http://localhost:8083/contratos
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = { MediaType.APPLICATION_JSON_VALUE })
     @Operation(summary = "Da de alta un contrato de alquiler")
-    public ResponseEntity<Object> insertar(@Valid @RequestBody ContratoDTO dto, BindingResult result)
-            throws Excepcion {
+    public ResponseEntity<?> insertar(@Valid @RequestBody ContratoDTO dto, BindingResult result) throws Excepcion {
 
-        // Si los datos no son válidos, devuelve los errores con código 400.
+        // Si los datos no son validos, devuelve los errores con codigo 400.
         if (result.hasErrors())
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(this.formatearErrores(result));
 
         Long idNuevo = service.insert(dto);
+        Contrato contrato = service.getById(idNuevo)
+                .orElseThrow(() -> new Excepcion("id", "No se pudo recuperar el contrato creado.", 500));
 
-        // Crea la dirección del contrato nuevo usando el ID generado.
+        // Crea la direccion del contrato nuevo usando el ID generado.
         URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(idNuevo).toUri();
 
-        // Devuelve el código 201 y la dirección del contrato creado.
-        return ResponseEntity.created(location).build();
+        // Devuelve 201 con la direccion y el contrato creado (con su self link) en el body.
+        return ResponseEntity.created(location).body(buildResponseBody(contrato));
     }
 
     //Marca el contrato como eliminado sin borrarlo de la base. Ejemplo: DELETE http://localhost:8083/contratos/1 

@@ -1,0 +1,839 @@
+{
+  "info": {
+    "_postman_id": "2a1f4c9e-7b3d-4e21-9c5a-0d8f6b7a1e01",
+    "name": "HogarYA · S01 Facturas · 6 casos + adicionales",
+    "description": "Coleccion autocontenida para S01 (API corregida: 201/200 con cuerpo y links HATEOAS). Crea sus propios contratos, usa fechas dinamicas y cubre los seis tipos de caso pedidos: alta exitosa, consulta por ID, listado con filtro, datos invalidos, recurso inexistente y conflicto de negocio. Incluye ademas anulacion/reemision y vencimiento en el ultimo dia del mes. Ejecutar en orden sobre una base de prueba.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Preparacion",
+      "item": [
+        {
+          "name": "00 - Crear contrato de prueba",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contratos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contratos"
+              ]
+            },
+            "description": "Crea un contrato activo de 12 meses con vencimiento el dia 28. El periodo de facturacion se calcula para el mes siguiente, de modo que el vencimiento sea futuro.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"propietario\":\"Propietario S01\",\"inquilino\":\"Inquilino S01\",\"direccionPropiedad\":\"Calle S01 123\",\"fechaInicio\":\"{{fechaInicioPrueba}}\",\"duracionMeses\":12,\"importeMensual\":350000,\"diaVencimiento\":28,\"descripcion\":\"Contrato creado por la coleccion S01\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const hoy = new Date();",
+                  "const pad = n => String(n).padStart(2, '0');",
+                  "const fecha = `${hoy.getFullYear()}-${pad(hoy.getMonth() + 1)}-${pad(hoy.getDate())}`;",
+                  "const proximo = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 1);",
+                  "const periodo = `${proximo.getFullYear()}-${pad(proximo.getMonth() + 1)}`;",
+                  "pm.collectionVariables.set('fechaInicioPrueba', fecha);",
+                  "pm.collectionVariables.set('periodoPrueba', periodo);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const loc = pm.response.headers.get('Location') || '';",
+                  "const partes = loc.split('/');",
+                  "const id = partes[partes.length - 1];",
+                  "pm.test('Location de contrato con ID', () => { pm.expect(loc).to.include('/contratos/'); pm.expect(Number.isInteger(Number(id))).to.eql(true); });",
+                  "pm.collectionVariables.set('contratoId', id);",
+                  "pm.test('Cuerpo con self link', () => pm.expect(pm.response.json()._links?.self).to.exist);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Casos obligatorios S01",
+      "item": [
+        {
+          "name": "01 - Alta exitosa de factura mensual",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas"
+              ]
+            },
+            "description": "Sin importe, el servicio emite la facturacion mensual con el importe del contrato. Esperado: 201, Location y cuerpo con self, datos autocompletados y sin link pago.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"idContrato\":{{contratoId}},\"periodo\":\"{{periodoPrueba}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const loc = pm.response.headers.get('Location') || '';",
+                  "const partes = loc.split('/');",
+                  "const id = partes[partes.length - 1];",
+                  "pm.test('Location de factura con ID', () => { pm.expect(loc).to.include('/facturas/'); pm.expect(Number.isInteger(Number(id))).to.eql(true); });",
+                  "pm.collectionVariables.set('facturaId', id);",
+                  "const b = pm.response.json();",
+                  "pm.test('Datos de la factura mensual autocompletados', () => { pm.expect(b.tipo).to.eql('MENSUAL'); pm.expect(b.estado).to.eql('PENDIENTE'); pm.expect(Number(b.importe)).to.eql(350000); });",
+                  "pm.test('Emision de hoy y vencimiento dentro del periodo', () => { const hoy = new Date().toISOString().slice(0,10); pm.expect(b.fechaEmision).to.eql(hoy); pm.expect(b.fechaVencimiento.startsWith(b.periodo)).to.eql(true); });",
+                  "pm.test('Links self y contrato', () => { pm.expect(b._links?.self).to.exist; pm.expect(b._links?.contrato).to.exist; });",
+                  "pm.test('Sin link de pago', () => pm.expect(b._links?.pago).to.not.exist);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 - Consulta de factura por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas/{{facturaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas",
+                "{{facturaId}}"
+              ]
+            },
+            "description": "Consulta la factura creada en el caso 01. Esperado: 200 con datos persistidos y links self/contrato."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('ID consultado coincide', () => pm.expect(String(b.id)).to.eql(pm.collectionVariables.get('facturaId')));",
+                  "pm.test('Datos persistidos', () => { pm.expect(b.tipo).to.eql('MENSUAL'); pm.expect(b.estado).to.eql('PENDIENTE'); pm.expect(Number(b.importe)).to.eql(350000); pm.expect(b.periodo).to.eql(pm.collectionVariables.get('periodoPrueba')); });",
+                  "pm.test('Links self y contrato', () => { pm.expect(b._links?.self).to.exist; pm.expect(b._links?.contrato).to.exist; });",
+                  "pm.test('Sin pago asociado', () => pm.expect(b._links?.pago).to.not.exist);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 - Listado con filtros",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas?contratoId={{contratoId}}&periodo={{periodoPrueba}}&estado=PENDIENTE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas"
+              ],
+              "query": [
+                {
+                  "key": "contratoId",
+                  "value": "{{contratoId}}"
+                },
+                {
+                  "key": "periodo",
+                  "value": "{{periodoPrueba}}"
+                },
+                {
+                  "key": "estado",
+                  "value": "PENDIENTE"
+                }
+              ]
+            },
+            "description": "Lista por contrato, periodo y estado. Esperado: 200 con _embedded.facturas y _links.self del listado conservando los filtros."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const filas = b._embedded?.facturas ?? [];",
+                  "pm.test('Listado HAL con self', () => pm.expect(b._links?.self).to.exist);",
+                  "pm.test('Self conserva los filtros', () => pm.expect(b._links.self.href).to.include('estado=PENDIENTE'));",
+                  "pm.test('Contiene la factura creada', () => pm.expect(filas.some(f => String(f.id) === pm.collectionVariables.get('facturaId'))).to.eql(true));",
+                  "pm.test('Cada factura tiene self', () => pm.expect(filas.every(f => f._links?.self)).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 - Datos invalidos: periodo con formato incorrecto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas"
+              ]
+            },
+            "description": "El periodo 2026-13 no cumple AAAA-MM. Esperado: 400 con un array de errores sobre el atributo periodo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"idContrato\":{{contratoId}},\"periodo\":\"2026-13\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Devuelve errores de validacion', () => { const b = pm.response.json(); pm.expect(b).to.be.an('array'); pm.expect(b.some(e => e.atributo === 'periodo')).to.eql(true); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 - Recurso relacionado inexistente: contrato",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas"
+              ]
+            },
+            "description": "El contrato 999999 no existe. Esperado: 404. Alternativa: GET /facturas/999999 tambien devuelve 404.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"idContrato\":999999,\"periodo\":\"{{periodoPrueba}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 - Conflicto: factura mensual duplicada",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas"
+              ]
+            },
+            "description": "Ya existe una factura mensual no anulada para el mismo contrato y periodo. Esperado: 409. No se crea ningun registro parcial.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"idContrato\":{{contratoId}},\"periodo\":\"{{periodoPrueba}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Casos adicionales",
+      "item": [
+        {
+          "name": "07a - Anular la factura pendiente",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas/{{facturaId}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas",
+                "{{facturaId}}",
+                "estado"
+              ]
+            },
+            "description": "Anula la factura creada en el caso 01. Esperado: 200 y estado ANULADA en el cuerpo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"estado\":\"ANULADA\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Estado ANULADA en la respuesta', () => pm.expect(pm.response.json().estado).to.eql('ANULADA'));",
+                  "pm.test('La respuesta conserva el self', () => pm.expect(pm.response.json()._links?.self).to.exist);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07b - Reemitir la factura mensual",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas"
+              ]
+            },
+            "description": "La factura anterior esta ANULADA, por lo que se permite emitir otra mensual para el mismo contrato y periodo. Esperado: 201 con un ID distinto.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"idContrato\":{{contratoId}},\"periodo\":\"{{periodoPrueba}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const loc = pm.response.headers.get('Location') || '';",
+                  "const partes = loc.split('/');",
+                  "const id = partes[partes.length - 1];",
+                  "pm.test('Location de la nueva factura', () => { pm.expect(loc).to.include('/facturas/'); pm.expect(Number.isInteger(Number(id))).to.eql(true); });",
+                  "pm.collectionVariables.set('facturaReemitidaId', id);",
+                  "const nuevoId = Number(id); const viejoId = Number(pm.collectionVariables.get('facturaId'));",
+                  "pm.test('Es una factura distinta', () => pm.expect(nuevoId).to.not.eql(viejoId));",
+                  "pm.test('La nueva factura esta pendiente', () => pm.expect(pm.response.json().estado).to.eql('PENDIENTE'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07c - Verificar que la factura original quedo ANULADA",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas/{{facturaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas",
+                "{{facturaId}}"
+              ]
+            },
+            "description": "Comprueba que la factura original sigue ANULADA luego de la reemision (se conserva el registro)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Estado ANULADA conservado', () => pm.expect(pm.response.json().estado).to.eql('ANULADA'));",
+                  "pm.test('Sin pago', () => pm.expect(pm.response.json()._links?.pago).to.not.exist);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07d - Verificar el periodo con dos facturas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas?contratoId={{contratoId}}&periodo={{periodoPrueba}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas"
+              ],
+              "query": [
+                {
+                  "key": "contratoId",
+                  "value": "{{contratoId}}"
+                },
+                {
+                  "key": "periodo",
+                  "value": "{{periodoPrueba}}"
+                }
+              ]
+            },
+            "description": "El listado del periodo muestra las dos facturas: la ANULADA conservada y la nueva PENDIENTE."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const filas = pm.response.json()._embedded?.facturas ?? [];",
+                  "pm.test('Hay dos facturas del periodo: anulada y reemitida', () => {",
+                  "  const usando = filas.filter(f => f.periodo === pm.collectionVariables.get('periodoPrueba'));",
+                  "  pm.expect(usando.length).to.eql(2);",
+                  "  const estados = usando.map(f => f.estado).sort();",
+                  "  pm.expect(estados).to.eql(['ANULADA', 'PENDIENTE']);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07e - Anular una factura ya anulada",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas/{{facturaId}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas",
+                "{{facturaId}}",
+                "estado"
+              ]
+            },
+            "description": "Solo se anulan pendientes o vencidas. Esperado: 409.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"estado\":\"ANULADA\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "08a - Crear contrato con vencimiento dia 31",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contratos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contratos"
+              ]
+            },
+            "description": "Crea un contrato con dia de vencimiento 31 y calcula un periodo de febrero dentro de la vigencia.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"propietario\":\"Propietario S01 b\",\"inquilino\":\"Inquilino S01 b\",\"direccionPropiedad\":\"Calle S01 456\",\"fechaInicio\":\"{{fechaInicioPrueba}}\",\"duracionMeses\":12,\"importeMensual\":350000,\"diaVencimiento\":31,\"descripcion\":\"Contrato para probar el ultimo dia de febrero\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const hoy = new Date();",
+                  "const pad = n => String(n).padStart(2, '0');",
+                  "let anio = hoy.getFullYear();",
+                  "if (hoy.getMonth() > 1) anio += 1;",
+                  "const periodo = `${anio}-02`;",
+                  "const ultimoDia = new Date(anio, 2, 0).getDate();",
+                  "pm.collectionVariables.set('periodoFebrero', periodo);",
+                  "pm.collectionVariables.set('ultimoDiaFebrero', `${periodo}-${pad(ultimoDia)}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const loc = pm.response.headers.get('Location') || '';",
+                  "const partes = loc.split('/');",
+                  "const id = partes[partes.length - 1];",
+                  "pm.test('Location de contrato con ID', () => { pm.expect(loc).to.include('/contratos/'); pm.expect(Number.isInteger(Number(id))).to.eql(true); });",
+                  "pm.collectionVariables.set('contrato31Id', id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "08b - Emitir factura de febrero y validar ultimo dia",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas"
+              ]
+            },
+            "description": "Con dia 31 y periodo febrero, el vencimiento debe ser 28 o 29 segun el anio. Esperado: 201 y fechaVencimiento igual al ultimo dia de febrero.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"idContrato\":{{contrato31Id}},\"periodo\":\"{{periodoFebrero}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json();",
+                  "pm.test('Vencimiento en el ultimo dia de febrero', () => pm.expect(b.fechaVencimiento).to.eql(pm.collectionVariables.get('ultimoDiaFebrero')));",
+                  "pm.test('Tipo MENSUAL', () => pm.expect(b.tipo).to.eql('MENSUAL'));",
+                  "const loc = pm.response.headers.get('Location') || '';",
+                  "pm.collectionVariables.set('factura31Id', loc.split('/').pop());"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "08c - Consultar la factura de febrero",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/facturas/{{factura31Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "facturas",
+                "{{factura31Id}}"
+              ]
+            },
+            "description": "Comprueba que la fecha de vencimiento calculada quedo persistida."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('Vencimiento persistido en el ultimo dia', () => pm.expect(b.fechaVencimiento).to.eql(pm.collectionVariables.get('ultimoDiaFebrero')));",
+                  "pm.test('Periodo correcto', () => pm.expect(b.periodo).to.eql(pm.collectionVariables.get('periodoFebrero')));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8083",
+      "type": "string"
+    },
+    {
+      "key": "contratoId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "facturaId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "facturaReemitidaId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "periodoPrueba",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "fechaInicioPrueba",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "contrato31Id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "periodoFebrero",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ultimoDiaFebrero",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "factura31Id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

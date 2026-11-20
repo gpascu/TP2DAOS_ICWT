@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,6 @@ import tuti.daos.icwt.presentacion.pagos.PagoRestController;
 import tuti.daos.icwt.servicios.FacturaService;
 
 // Facturas (S01): emision, consulta y anulacion de facturas de alquiler
-
 @RestController
 @RequestMapping("/facturas")
 @Tag(name = "Facturas", description = "Emision, consulta y anulacion de facturas de alquiler")
@@ -44,91 +44,91 @@ public class FacturaRestController {
 	@Autowired
 	private FacturaService service;
 
-	/**
-	 * Lista y filtra facturas.
-	 * Ejemplos:
-	 *  GET 'http://localhost:8083/facturas'
-	 *  GET 'http://localhost:8083/facturas?contratoId=1&periodo=2026-11'
-	 *  GET 'http://localhost:8083/facturas?estado=PENDIENTE'
-	 */
+	// Lista y filtra facturas. El listado se devuelve como coleccion HAL con su self link.
 	@GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE })
 	@Operation(summary = "Lista y filtra facturas (por contrato, periodo o estado)")
-	public ResponseEntity<List<FacturaResponseDTO>> listar(@RequestParam(required = false) Long contratoId,
-			@RequestParam(required = false) String periodo, @RequestParam(required = false) EstadoFactura estado)
-			throws Excepcion {
-		List<FacturaResponseDTO> dtos = new ArrayList<FacturaResponseDTO>();
+	public ResponseEntity<CollectionModel<FacturaResponseDTO>> listar(
+			@RequestParam(required = false) Long contratoId,
+			@RequestParam(required = false) String periodo,
+			@RequestParam(required = false) EstadoFactura estado) throws Excepcion {
+
+		List<FacturaResponseDTO> dtos = new ArrayList<>();
 		for (Factura f : service.listar(contratoId, periodo, estado)) {
 			dtos.add(buildResponseBody(f));
 		}
-		return new ResponseEntity<List<FacturaResponseDTO>>(dtos, HttpStatus.OK);
+
+		// Self del listado, conservando los filtros aplicados en la URL.
+		Link selfLink = Link.of(ServletUriComponentsBuilder.fromCurrentRequest().toUriString()).withSelfRel();
+		return ResponseEntity.ok(CollectionModel.of(dtos, selfLink));
 	}
 
-	/**
-	 * Consulta una factura por id.
-	 *  Ejemplo: GET 'http://localhost:8083/facturas/1'
-	 */
+	// Consulta una factura por id. Ejemplo: GET 'http://localhost:8083/facturas/1'
 	@GetMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	@Operation(summary = "Consulta una factura por su id")
 	public ResponseEntity<FacturaResponseDTO> getById(@PathVariable Long id) throws Excepcion {
 		Optional<Factura> rta = service.getById(id);
 		if (rta.isPresent())
-			return new ResponseEntity<FacturaResponseDTO>(buildResponseBody(rta.get()), HttpStatus.OK);
+			return new ResponseEntity<>(buildResponseBody(rta.get()), HttpStatus.OK);
 		else
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 	}
 
-	/**
-	 * Emite una factura. Con solo contrato y periodo se emite la facturacion mensual.
-	 * Ejemplo POST 'http://localhost:8080/facturas' \
-		 */
-	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+	// Emite una factura. Con solo contrato y periodo se emite la facturacion mensual.
+	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = { MediaType.APPLICATION_JSON_VALUE })
 	@Operation(summary = "Emite una factura (facturacion mensual o adicional)")
-	public ResponseEntity<Object> emitir(@Valid @RequestBody FacturaDTO dto, BindingResult result) throws Excepcion {
+	public ResponseEntity<?> emitir(@Valid @RequestBody FacturaDTO dto, BindingResult result) throws Excepcion {
 		if (result.hasErrors())
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(this.formatearErrores(result));
 
 		Long idNueva = service.emitir(dto);
+		Factura factura = service.getById(idNueva)
+				.orElseThrow(() -> new Excepcion("id", "No se pudo recuperar la factura emitida.", 500));
 
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(idNueva).toUri();
-		return ResponseEntity.created(location).build();
+
+		// 201 con Location y con la factura creada en el body: el cliente ve de una los
+		// datos calculados por el sistema (emision, vencimiento, importe) y los links.
+		return ResponseEntity.created(location).body(buildResponseBody(factura));
 	}
 
-	/**
-	 * Anula una factura pendiente o vencida.
-	 * Ejemplo PATCH 'http://localhost:8080/facturas/1/estado' \
-	 */
-	@PatchMapping("/{id}/estado")
+	// Anula una factura pendiente o vencida.
+	@PatchMapping(value = "/{id}/estado", consumes = MediaType.APPLICATION_JSON_VALUE, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
 	@Operation(summary = "Anula una factura pendiente o vencida")
-	public ResponseEntity<Object> anular(@PathVariable Long id, @Valid @RequestBody CambioEstadoFacturaDTO dto,
+	public ResponseEntity<?> anular(@PathVariable Long id, @Valid @RequestBody CambioEstadoFacturaDTO dto,
 			BindingResult result) throws Excepcion {
 		if (result.hasErrors())
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(this.formatearErrores(result));
 
-		// por ahora la unica transicion que permite esta operacion es anular
+		// Por ahora la unica transicion que permite esta operacion es anular.
 		if (dto.getEstado() != EstadoFactura.ANULADA)
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.body(new ErrorAtributo("estado", "Esta operacion solo permite anular la factura"));
 
 		service.anular(id);
-		return ResponseEntity.ok().build();
+		Factura factura = service.getById(id)
+				.orElseThrow(() -> new Excepcion("id", "No se encuentra la factura.", 404));
+
+		// 200 con la factura ya anulada y sus links.
+		return ResponseEntity.ok(buildResponseBody(factura));
 	}
 
-	// METODOS Auxiliares
+	// METODOS AUXILIARES
 
 	private FacturaResponseDTO buildResponseBody(Factura pojo) throws Excepcion {
 		try {
 			FacturaResponseDTO dto = new FacturaResponseDTO(pojo);
 
-			// self link
+			// Self link.
 			Link selfLink = WebMvcLinkBuilder.linkTo(FacturaRestController.class).slash(pojo.getId()).withSelfRel();
 			dto.add(selfLink);
 
-			// link al contrato asociado
+			// Link al contrato asociado.
 			Link contratoLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(ContratoRestController.class)
 					.getById(pojo.getContrato().getId())).withRel("contrato");
 			dto.add(contratoLink);
 
-			// link al pago asociado, unicamente cuando existe
+			// Link al pago asociado, unicamente cuando existe.
 			if (pojo.getPago() != null) {
 				Link pagoLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(PagoRestController.class)
 						.getById(pojo.getPago().getId())).withRel("pago");
@@ -143,7 +143,7 @@ public class FacturaRestController {
 
 	private List<ErrorAtributo> formatearErrores(BindingResult result) {
 		List<FieldError> errors = result.getFieldErrors();
-		List<ErrorAtributo> respuesta = new ArrayList<ErrorAtributo>();
+		List<ErrorAtributo> respuesta = new ArrayList<>();
 		for (FieldError error : errors) {
 			respuesta.add(new ErrorAtributo(error.getField(), error.getDefaultMessage()));
 		}

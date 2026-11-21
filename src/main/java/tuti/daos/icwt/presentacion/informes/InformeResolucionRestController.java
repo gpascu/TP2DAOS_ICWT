@@ -1,4 +1,3 @@
-
 package tuti.daos.icwt.presentacion.informes;
 
 import java.net.URI;
@@ -6,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
@@ -25,8 +25,6 @@ import tuti.daos.icwt.entidades.InformeResolucion;
 import tuti.daos.icwt.error.ErrorAtributo;
 import tuti.daos.icwt.servicios.InformeResolucionService;
 
-// S04: Registro y consulta de informes de resolución.
-
 @RestController
 @RequestMapping("/informes-resolucion")
 @Tag(
@@ -38,10 +36,9 @@ public class InformeResolucionRestController {
     @Autowired
     private InformeResolucionService service;
 
-    // Lista todos los informes o filtra por incidente.
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Lista informes de resolución")
-    public ResponseEntity<List<InformeResolucionResponseDTO>> listar(
+    public ResponseEntity<CollectionModel<InformeResolucionResponseDTO>> listar(
             @RequestParam(required = false) Long incidenteId) {
 
         List<InformeResolucionResponseDTO> respuesta =
@@ -53,10 +50,18 @@ public class InformeResolucionRestController {
             respuesta.add(buildResponseBody(informe));
         }
 
-        return ResponseEntity.ok(respuesta);
+        Link selfLink = Link.of(
+                ServletUriComponentsBuilder
+                        .fromCurrentRequest()
+                        .toUriString())
+                .withSelfRel();
+
+        CollectionModel<InformeResolucionResponseDTO> collection =
+                CollectionModel.of(respuesta, selfLink);
+
+        return ResponseEntity.ok(collection);
     }
 
-    // Consulta un informe por su ID.
     @GetMapping(
         value = "/{id}",
         produces = MediaType.APPLICATION_JSON_VALUE
@@ -70,7 +75,6 @@ public class InformeResolucionRestController {
         return ResponseEntity.ok(buildResponseBody(informe));
     }
 
-    // Registra un informe y resuelve el incidente.
     @PostMapping(
         consumes = MediaType.APPLICATION_JSON_VALUE
     )
@@ -95,14 +99,12 @@ public class InformeResolucionRestController {
         return ResponseEntity.created(location).build();
     }
 
-    // Construye la respuesta y agrega enlaces HATEOAS.
     private InformeResolucionResponseDTO buildResponseBody(
             InformeResolucion informe) {
 
         InformeResolucionResponseDTO dto =
                 new InformeResolucionResponseDTO(informe);
 
-        // Enlace al propio informe.
         Link selfLink = WebMvcLinkBuilder
                 .linkTo(InformeResolucionRestController.class)
                 .slash(informe.getId())
@@ -110,7 +112,6 @@ public class InformeResolucionRestController {
 
         dto.add(selfLink);
 
-        // Enlace al incidente relacionado.
         String href = ServletUriComponentsBuilder
                 .fromCurrentContextPath()
                 .path("/incidentes/{id}")
@@ -122,13 +123,14 @@ public class InformeResolucionRestController {
         return dto;
     }
 
-    // Convierte los errores de validación en una respuesta.
     private List<ErrorAtributo> formatearErrores(
             BindingResult result) {
 
-        List<ErrorAtributo> respuesta = new ArrayList<>();
+        List<ErrorAtributo> respuesta =
+                new ArrayList<>();
 
-        for (FieldError error : result.getFieldErrors()) {
+        for (FieldError error :
+                result.getFieldErrors()) {
 
             respuesta.add(new ErrorAtributo(
                     error.getField(),

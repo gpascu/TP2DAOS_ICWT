@@ -1,0 +1,319 @@
+{
+  "info": {
+    "_postman_id": "c2e15d52-4474-49ba-95f5-077e7c568bca",
+    "name": "HogarYA · S02 Pagos",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "60341335",
+    "_collection_link": "https://go.postman.co/collection/60341335-c2e15d52-4474-49ba-95f5-077e7c568bca?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Preparacion",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.collectionVariables.set(\"f1\", pm.response.headers.get(\"Location\").split(\"/\").pop());"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"idContrato\": 1,\n    \"periodo\": \"2026-11\",\n    \"fechaEmision\": \"2026-11-01\",\n    \"fechaVencimiento\": \"2026-11-10\",\n    \"importe\": 350000\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/facturas",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "facturas"
+          ]
+        },
+        "description": "Solicitud: POST /pagos  \nDatos: factura {{f1}} de 350000, vencida el 2026-11-10. Interés 5000, importe pagado 355000.  \nEsperado: HTTP 201 con header Location /pagos/{id}. La factura pasa a PAGADA."
+      },
+      "response": []
+    },
+    {
+      "name": "Caso 1: pago exitoso",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              " pm.collectionVariables.set(\"pago1\", pm.response.headers.get(\"Location\").split(\"/\").pop());",
+              " pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"idFactura\":{{f1}},\"medio\":\"TRANSFERENCIA\",\"importePagado\":355000,\"interes\":5000}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/pagos",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "pagos"
+          ]
+        },
+        "description": "Solicitud: POST /pagos  \nDatos: factura {{f1}} de 350000, vencida el 2026-11-10. Interés 5000, importe pagado 355000.  \nEsperado: HTTP 201 con header Location /pagos/{id}. La factura pasa a PAGADA."
+      },
+      "response": []
+    },
+    {
+      "name": "Caso 2: consulta por id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/pagos/{{pago1}}",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "pagos",
+            "{{pago1}}"
+          ]
+        },
+        "description": "Solicitud: GET /pagos/{id}  \nDatos: el pago creado en el caso 1.  \nEsperado: HTTP 200 con los datos del pago (TRANSFERENCIA, 355000, interés 5000) y los links self y factura."
+      },
+      "response": []
+    },
+    {
+      "name": "Caso 3: listado con filtro",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/pagos?facturaId={{f1}}",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "pagos"
+          ],
+          "query": [
+            {
+              "key": "facturaId",
+              "value": "{{f1}}"
+            }
+          ]
+        },
+        "description": "Solicitud: GET /pagos?facturaId={id}  \nDatos: la factura pagada en el caso 1.  \nEsperado: HTTP 200 con una lista de un solo pago, el de esa factura."
+      },
+      "response": []
+    },
+    {
+      "name": "Caso 4: datos inválidos",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"idFactura\":{{f1}},\"importePagado\":350000,\"interes\":-1}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/pagos",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "pagos"
+          ]
+        },
+        "description": "Solicitud: POST /pagos  \nDatos: sin medio de pago y con interés negativo.  \nEsperado: HTTP 400 con los errores de \"medio\" e \"interes\". No se registra el pago."
+      },
+      "response": []
+    },
+    {
+      "name": "Caso 5: recurso inexistente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"idFactura\":999999,\"medio\":\"EFECTIVO\",\"importePagado\":350000,\"interes\":0}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/pagos",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "pagos"
+          ]
+        },
+        "description": "Solicitud: POST /pagos  \nDatos: factura 999999, que no existe.  \nEsperado: HTTP 404, \"La factura indicada no existe.\""
+      },
+      "response": []
+    },
+    {
+      "name": "Caso 6: conflicto de negocio",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"idFactura\":{{f1}},\"medio\":\"EFECTIVO\",\"importePagado\":355000,\"interes\":5000}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/pagos",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "pagos"
+          ]
+        },
+        "description": "Solicitud: POST /pagos  \nDatos: segundo pago de la factura {{f1}}, ya pagada en el caso 1.  \nEsperado: HTTP 409, \"La factura ya se encuentra pagada.\" No se registra un segundo pago."
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base",
+      "value": ""
+    },
+    {
+      "key": "f1",
+      "value": ""
+    },
+    {
+      "key": "pago1",
+      "value": ""
+    }
+  ]
+}

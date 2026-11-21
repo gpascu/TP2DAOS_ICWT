@@ -8,7 +8,9 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import tuti.daos.icwt.accesoDatos.IContratoRepo;
 import tuti.daos.icwt.accesoDatos.IFacturaRepo;
 import tuti.daos.icwt.entidades.Contrato;
 import tuti.daos.icwt.entidades.EstadoContrato;
@@ -26,15 +28,17 @@ public class FacturaServiceImpl implements FacturaService {
     @Autowired
     private IFacturaRepo repo;
 
-    // Spring asigna el servicio para consultar los contratos.
+    // Acceso al contrato bloqueado durante la emision mensual.
     @Autowired
-    private ContratoService contratoService;
+    private IContratoRepo contratoRepo;
 
+    // El bloqueo debe mantenerse desde el chequeo de duplicados hasta el INSERT.
     @Override
+    @Transactional(rollbackFor = Excepcion.class)
     public Long emitir(FacturaDTO dto) throws Excepcion {
 
         // Busca el contrato indicado.
-        Optional<Contrato> rta = contratoService.getById(dto.getIdContrato());
+        Optional<Contrato> rta = contratoRepo.buscarPorIdParaFacturacion(dto.getIdContrato());
 
         // Si el contrato no existe, lanza un error.
         if (!rta.isPresent())
@@ -173,10 +177,12 @@ public class FacturaServiceImpl implements FacturaService {
     }
 
     @Override
+    @Transactional(rollbackFor = Excepcion.class)
     public void anular(Long id) throws Excepcion {
 
         // Busca la factura que se quiere anular.
-        Optional<Factura> rta = repo.findById(id);
+        // Misma fila y mismo bloqueo que el usado al registrar pagos.
+        Optional<Factura> rta = repo.findParaPagoById(id);
 
         // Si no existe, lanza un error.
         if (!rta.isPresent())

@@ -3,6 +3,7 @@ package tuti.daos.icwt.presentacion.facturas;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
@@ -12,6 +13,7 @@ public class FacturaDTO {
 
     // El ID del contrato es obligatorio.
     @NotNull(message = "El contrato es obligatorio")
+    @Positive(message = "El identificador del contrato debe ser positivo")
     private Long idContrato;
 
     // El período es obligatorio y debe tener cuatro dígitos para el año y un mes entre 01 y 12.
@@ -29,6 +31,7 @@ public class FacturaDTO {
 
     // Si no se indica, se usa el importe mensual del contrato; si se indica, debe ser mayor que cero.
     @Positive(message = "El importe debe ser positivo")
+    @Digits(integer = 36, fraction = 2, message = "El importe admite hasta dos decimales")
     private BigDecimal importe;
 
     public Long getIdContrato() {

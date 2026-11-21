@@ -12,8 +12,9 @@ import tuti.daos.icwt.entidades.MedioPago;
 
 public class PagoDTO {
 
-	@NotNull(message = "La factura es obligatoria")
-	private Long idFactura;
+    @NotNull(message = "La factura es obligatoria")
+    @Positive(message = "El identificador de la factura debe ser positivo")
+    private Long idFactura;
 
 	@PastOrPresent(message = "La fecha de pago no puede ser futura")
 	private LocalDate fechaPago;

@@ -1,0 +1,493 @@
+{
+  "info": {
+    "_postman_id": "b5ef2cd1-32b9-41ec-9200-1f608d42269d",
+    "name": "HogarYA · Integración S01+S02 · Facturación y Pago (8 solicitudes)",
+    "description": "Recorrido integrador completo de la Actividad 02 de DAOS. Ejecutar en orden con Postman Collection Runner; sin dependencias de contratos preexistentes, fechas fijas ni variable baseUrl. Valida factura → pago → factura PAGADA → navegación del enlace HATEOAS a pago → rechazo 409 del segundo pago → ausencia de registros parciales. Inicia aplicación Spring Boot y MySQL antes de ejecutar.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "60341335",
+    "_collection_link": "https://go.postman.co/collection/60341335-b5ef2cd1-32b9-41ec-9200-1f608d42269d?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "00 · Preparación: crear contrato vigente [201]",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Fechas dinamicas: evita contratos inexistentes y periodos vencidos.",
+              "const hoy = new Date();",
+              "const inicio = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 2);",
+              "const proximoMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 1);",
+              "const formFecha = f => [f.getFullYear(), String(f.getMonth()+1).padStart(2,'0'), String(f.getDate()).padStart(2,'0')].join('-');",
+              "const periodo = [proximoMes.getFullYear(), String(proximoMes.getMonth()+1).padStart(2,'0')].join('-');",
+              "pm.collectionVariables.set('intFechaInicio', formFecha(inicio));",
+              "pm.collectionVariables.set('intPeriodo', periodo);",
+              "pm.collectionVariables.set('intMarca', String(Date.now()));",
+              "['intContratoId','intFacturaId','intPagoId'].forEach(k => pm.collectionVariables.unset(k));",
+              "// URL valida de respaldo; se reemplaza SOLO por el enlace HATEOAS de la factura.",
+              "pm.collectionVariables.set('intPagoHATEOASUrl', 'http://localhost:8083/pagos/0');"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201 - contrato preparado', () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) {",
+              "  const r = pm.response.json();",
+              "  const loc = pm.response.headers.get('Location') || '';",
+              "  const id = r.id ?? loc.split('/').pop();",
+              "  pm.test('Contrato creado con ID y Location', () => {",
+              "    pm.expect(Number(id)).to.be.above(0);",
+              "    pm.expect(loc).to.include('/contratos/');",
+              "  });",
+              "  pm.collectionVariables.set('intContratoId', String(id));",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"propietario\": \"Propietario Integracion {{intMarca}}\",\n  \"inquilino\": \"Inquilino Integracion {{intMarca}}\",\n  \"direccionPropiedad\": \"Calle Prueba Facturacion 123 {{intMarca}}\",\n  \"fechaInicio\": \"{{intFechaInicio}}\",\n  \"duracionMeses\": 12,\n  \"importeMensual\": 350000,\n  \"diaVencimiento\": 28,\n  \"descripcion\": \"Contrato autonomo para recorrido S01+S02\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8083/contratos",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8083",
+          "path": [
+            "contratos"
+          ]
+        },
+        "description": "Solicitud: POST /contratos. Datos: propietario, inquilino, dirección de prueba, fecha de inicio dinámica (dos días antes), duración de 12 meses, importe mensual 350000 y vencimiento día 28. HTTP esperado: 201. Resultado: nuevo contrato ACTIVO con ID guardado como intContratoId, independiente de contratos precargados."
+      },
+      "response": []
+    },
+    {
+      "name": "01 · Emitir factura mensual S01 [201]",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201 - factura emitida', () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) {",
+              "  const f = pm.response.json();",
+              "  const loc = pm.response.headers.get('Location') || '';",
+              "  pm.test('Factura mensual, PENDIENTE y por $350000', () => {",
+              "    pm.expect(f.tipo).to.eql('MENSUAL');",
+              "    pm.expect(f.estado).to.eql('PENDIENTE');",
+              "    pm.expect(Number(f.importe)).to.eql(350000);",
+              "    pm.expect(String(f.idContrato)).to.eql(pm.collectionVariables.get('intContratoId'));",
+              "    pm.expect(f.periodo).to.eql(pm.collectionVariables.get('intPeriodo'));",
+              "  });",
+              "  pm.test('HATEOAS self/contrato; sin pago todavía', () => {",
+              "    pm.expect(f._links?.self?.href).to.be.a('string');",
+              "    pm.expect(f._links?.contrato?.href).to.be.a('string');",
+              "    pm.expect(f._links?.pago).to.be.undefined;",
+              "    pm.expect(loc).to.include('/facturas/');",
+              "  });",
+              "  pm.collectionVariables.set('intFacturaId', String(f.id));",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"idContrato\": {{intContratoId}},\n  \"periodo\": \"{{intPeriodo}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8083/facturas",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8083",
+          "path": [
+            "facturas"
+          ]
+        },
+        "description": "Solicitud: POST /facturas. Datos: idContrato creado y periodo del mes siguiente, sin importe ni fecha de emisión/vencimiento (se completan automáticamente). HTTP esperado: 201. Resultado: factura MENSUAL por 350000 en PENDIENTE, con links self y contrato, sin pago todavía."
+      },
+      "response": []
+    },
+    {
+      "name": "02 · Registrar pago completo S02 [201]",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201 - pago registrado', () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) {",
+              "  const p = pm.response.json();",
+              "  pm.test('Pago total: 350000 + 5000 = 355000', () => {",
+              "    pm.expect(String(p.idFactura)).to.eql(pm.collectionVariables.get('intFacturaId'));",
+              "    pm.expect(Number(p.importePagado)).to.eql(355000);",
+              "    pm.expect(Number(p.interes)).to.eql(5000);",
+              "    pm.expect(p.medio).to.eql('TRANSFERENCIA');",
+              "    pm.expect(p.fechaPago).to.be.a('string');",
+              "  });",
+              "  pm.test('Respuesta con Location y enlaces HATEOAS', () => {",
+              "    pm.expect(pm.response.headers.get('Location') || '').to.include('/pagos/');",
+              "    pm.expect(p._links?.self?.href).to.be.a('string');",
+              "    pm.expect(p._links?.factura?.href).to.be.a('string');",
+              "  });",
+              "  pm.collectionVariables.set('intPagoId', String(p.id));",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"idFactura\": {{intFacturaId}},\n  \"medio\": \"TRANSFERENCIA\",\n  \"importePagado\": 355000,\n  \"interes\": 5000\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8083/pagos",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8083",
+          "path": [
+            "pagos"
+          ]
+        },
+        "description": "Solicitud: POST /pagos. Datos: idFactura generado; TRANSFERENCIA; importePagado 355000 e interes 5000. HTTP esperado: 201. Resultado: pago único creado y factura actualizada a PAGADA en la misma transacción."
+      },
+      "response": []
+    },
+    {
+      "name": "03 · Consultar factura PAGADA y extraer enlace HATEOAS [200]",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200 - factura consultada', () => pm.response.to.have.status(200));",
+              "if (pm.response.code === 200) {",
+              "  const f = pm.response.json();",
+              "  pm.test('Factura PAGADA y del mismo ID', () => {",
+              "    pm.expect(String(f.id)).to.eql(pm.collectionVariables.get('intFacturaId'));",
+              "    pm.expect(f.estado).to.eql('PAGADA');",
+              "  });",
+              "  const href = f._links?.pago?.href;",
+              "  pm.test('Factura PAGADA contiene enlace HATEOAS pago', () => {",
+              "    pm.expect(href).to.be.a('string').and.not.empty;",
+              "    pm.expect(href).to.match(/\\/pagos\\/\\d+(?:\\?.*)?$/);",
+              "  });",
+              "  if (typeof href === 'string' && /^https?:\\/\\/[^\\s]+\\/pagos\\/\\d+(?:\\?.*)?$/.test(href)) {",
+              "    pm.collectionVariables.set('intPagoHATEOASUrl', href);",
+              "  }",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8083/facturas/{{intFacturaId}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8083",
+          "path": [
+            "facturas",
+            "{{intFacturaId}}"
+          ]
+        },
+        "description": "Solicitud: GET /facturas/{id}. Datos: intFacturaId. HTTP esperado: 200. Resultado: estado PAGADA y presencia de _links.pago.href. El script guarda la URL real del enlace en intPagoHATEOASUrl; no construye la dirección del pago."
+      },
+      "response": []
+    },
+    {
+      "name": "04 · SEGUIR enlace HATEOAS al pago [200]",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200 - pago obtenido siguiendo HATEOAS', () => pm.response.to.have.status(200));",
+              "if (pm.response.code === 200) {",
+              "  const p = pm.response.json();",
+              "  pm.test('El enlace apunta al pago registrado', () => {",
+              "    pm.expect(String(p.id)).to.eql(pm.collectionVariables.get('intPagoId'));",
+              "    pm.expect(String(p.idFactura)).to.eql(pm.collectionVariables.get('intFacturaId'));",
+              "    pm.expect(Number(p.importePagado)).to.eql(355000);",
+              "    pm.expect(Number(p.interes)).to.eql(5000);",
+              "  });",
+              "  pm.test('Navegacion REST: el pago enlaza su factura', () => {",
+              "    pm.expect(p._links?.self?.href).to.be.a('string');",
+              "    pm.expect(p._links?.factura?.href).to.include('/facturas/');",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{intPagoHATEOASUrl}}",
+          "host": [
+            "{{intPagoHATEOASUrl}}"
+          ]
+        },
+        "description": "Solicitud: GET a la URL obtenida literalmente desde _links.pago.href de la factura PAGADA. HTTP esperado: 200. Resultado: ID, factura, importe, interés y enlaces del pago correctos. El valor inicial de la variable es una URL local /pagos/0 para evitar Empty request URL si falla la solicitud anterior; la prueba fallará en ese caso."
+      },
+      "response": []
+    },
+    {
+      "name": "05 · Intentar registrar segundo pago [409]",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409 - segundo pago rechazado', () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"idFactura\": {{intFacturaId}},\n  \"medio\": \"EFECTIVO\",\n  \"importePagado\": 355000,\n  \"interes\": 5000\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8083/pagos",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8083",
+          "path": [
+            "pagos"
+          ]
+        },
+        "description": "Solicitud: POST /pagos sobre la MISMA factura ya pagada. Datos: factura existente; EFECTIVO; importePagado 355000 e interes 5000. HTTP esperado: 409 Conflict. Resultado: operación rechazada; ningún segundo pago registrado."
+      },
+      "response": []
+    },
+    {
+      "name": "06 · Verificar pago único mediante listado filtrado [200]",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200 - consulta de pagos por factura', () => pm.response.to.have.status(200));",
+              "if (pm.response.code === 200) {",
+              "  const r = pm.response.json();",
+              "  // Admite el nombre _embedded asignado por Spring HATEOAS al DTO de Pago.",
+              "  const grupos = r._embedded ? Object.values(r._embedded) : [];",
+              "  const pagos = Array.isArray(r) ? r : (grupos.find(Array.isArray) || []);",
+              "  pm.test('Solo existe un pago para esta factura (sin registro parcial)', () => {",
+              "    pm.expect(pagos).to.have.lengthOf(1);",
+              "    pm.expect(String(pagos[0].id)).to.eql(pm.collectionVariables.get('intPagoId'));",
+              "    pm.expect(String(pagos[0].idFactura)).to.eql(pm.collectionVariables.get('intFacturaId'));",
+              "  });",
+              "  pm.test('Listado con HATEOAS self', () => pm.expect(r._links?.self?.href).to.be.a('string'));",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8083/pagos?facturaId={{intFacturaId}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8083",
+          "path": [
+            "pagos"
+          ],
+          "query": [
+            {
+              "key": "facturaId",
+              "value": "{{intFacturaId}}"
+            }
+          ]
+        },
+        "description": "Solicitud: GET /pagos?facturaId={id}. Datos: idFactura de la ejecución. HTTP esperado: 200. Resultado: exactamente un pago para la factura (el primero), comprobando que el segundo intento no dejó registro parcial; enlace self en el listado."
+      },
+      "response": []
+    },
+    {
+      "name": "07 · Verificar que factura continúa PAGADA [200]",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200 - comprobacion final', () => pm.response.to.have.status(200));",
+              "if (pm.response.code === 200) {",
+              "  const f = pm.response.json();",
+              "  pm.test('El intento rechazado no modificó la factura PAGADA', () => {",
+              "    pm.expect(String(f.id)).to.eql(pm.collectionVariables.get('intFacturaId'));",
+              "    pm.expect(f.estado).to.eql('PAGADA');",
+              "    pm.expect(f._links?.pago?.href).to.include('/pagos/' + pm.collectionVariables.get('intPagoId'));",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8083/facturas/{{intFacturaId}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8083",
+          "path": [
+            "facturas",
+            "{{intFacturaId}}"
+          ]
+        },
+        "description": "Solicitud: GET /facturas/{id} luego del conflicto 409. HTTP esperado: 200. Resultado: factura permanece PAGADA y enlazada al mismo pago, sin cambios tras el intento fallido."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "intFechaInicio",
+      "value": ""
+    },
+    {
+      "key": "intPeriodo",
+      "value": ""
+    },
+    {
+      "key": "intMarca",
+      "value": ""
+    },
+    {
+      "key": "intContratoId",
+      "value": ""
+    },
+    {
+      "key": "intFacturaId",
+      "value": ""
+    },
+    {
+      "key": "intPagoHATEOASUrl",
+      "value": "http://localhost:8083/pagos/0"
+    }
+  ]
+}

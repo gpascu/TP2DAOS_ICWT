@@ -458,7 +458,8 @@
               "marca(\"HTTP 200\", pm.response.code === 200);",
               "if (pm.response.code === 200) {",
               "const respuesta = pm.response.json();",
-              "const filas = Array.isArray(respuesta) ? respuesta : (respuesta._embedded?.informes ?? []);",
+              "const filas = Array.isArray(respuesta) ? respuesta",
+              "    : (respuesta._embedded?.informes ?? respuesta._embedded?.informeResolucionResponseDTOList ?? []);",
               "marca(\"Solo está el primer informe\", filas.length === 1",
               "    && String(filas[0].id) === String(pm.collectionVariables.get(\"primerInformeId\")));",
               "}"
@@ -651,14 +652,17 @@
               "marca(\"HTTP 200\", pm.response.code === 200);",
               "if (pm.response.code === 200) {",
               "const respuesta = pm.response.json();",
-              "const filas = Array.isArray(respuesta) ? respuesta : (respuesta._embedded?.informes ?? []);",
+              "const filas = Array.isArray(respuesta) ? respuesta",
+              "    : (respuesta._embedded?.informes ?? respuesta._embedded?.informeResolucionResponseDTOList ?? []);",
               "const primero = filas.find(i => String(i.id) === String(pm.collectionVariables.get(\"primerInformeId\")));",
               "const segundo = filas.find(i => String(i.id) === String(pm.collectionVariables.get(\"segundoInformeId\")));",
               "const id = String(pm.collectionVariables.get(\"incidenteId\"));",
               "marca(\"Son dos informes del mismo incidente\", filas.length === 2 && !!primero && !!segundo",
               "    && primero.id !== segundo.id && filas.every(i => String(i.incidenteId) === id));",
-              "pm.collectionVariables.set(\"fechaPrimerInforme\", primero.fechaHoraResolucion);",
-              "pm.collectionVariables.set(\"fechaSegundoInforme\", segundo.fechaHoraResolucion);",
+              "if (primero && segundo) {",
+              "    pm.collectionVariables.set(\"fechaPrimerInforme\", primero.fechaHoraResolucion);",
+              "    pm.collectionVariables.set(\"fechaSegundoInforme\", segundo.fechaHoraResolucion);",
+              "}",
               "}"
             ]
           }
@@ -690,8 +694,8 @@
               "const entradas = pm.response.json()._embedded.historial;",
               "const estados = entradas.map(e => e.estadoNuevo);",
               "marca(\"Recorrido completo\", estados.join() === \"ABIERTO,EN_PROCESO,RESUELTO,REABIERTO,EN_PROCESO,RESUELTO\");",
-              "marca(\"Primera fecha compartida\", entradas[2].fechaHora === pm.collectionVariables.get(\"fechaPrimerInforme\"));",
-              "marca(\"Segunda fecha compartida\", entradas[5].fechaHora === pm.collectionVariables.get(\"fechaSegundoInforme\"));",
+              "marca(\"Primera fecha compartida\", !!entradas[2]?.fechaHora && entradas[2].fechaHora === pm.collectionVariables.get(\"fechaPrimerInforme\"));",
+              "marca(\"Segunda fecha compartida\", !!entradas[5]?.fechaHora && entradas[5].fechaHora === pm.collectionVariables.get(\"fechaSegundoInforme\"));",
               "}"
             ]
           }

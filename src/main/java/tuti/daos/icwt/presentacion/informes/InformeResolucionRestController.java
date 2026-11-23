@@ -96,7 +96,7 @@ public class InformeResolucionRestController {
                 .buildAndExpand(nuevo.getId())
                 .toUri();
 
-        return ResponseEntity.created(location).build();
+        return ResponseEntity.created(location).body(buildResponseBody(nuevo));
     }
 
     private InformeResolucionResponseDTO buildResponseBody(

@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.core.Relation;
 
 import tuti.daos.icwt.entidades.InformeResolucion;
 
@@ -12,6 +13,7 @@ import tuti.daos.icwt.entidades.InformeResolucion;
  * Devuelve los datos de un informe de resolución
  * y permite agregar enlaces HATEOAS.
  */
+@Relation(collectionRelation = "informes")
 public class InformeResolucionResponseDTO
         extends RepresentationModel<InformeResolucionResponseDTO> {
 

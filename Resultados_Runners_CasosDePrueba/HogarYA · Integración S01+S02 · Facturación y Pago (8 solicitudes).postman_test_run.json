@@ -1,0 +1,133 @@
+{
+	"id": "bf562081-334b-4e8f-a6a0-d2f37bd91019",
+	"name": "HogarYA · Integración S01+S02 · Facturación y Pago (8 solicitudes)",
+	"timestamp": "2026-11-26T18:27:31.375Z",
+	"collection_id": "60341335-b5ef2cd1-32b9-41ec-9200-1f608d42269d",
+	"folder_id": 0,
+	"environment_id": "0",
+	"totalPass": 6,
+	"delay": 0,
+	"persist": true,
+	"status": "error",
+	"startedAt": "2026-11-26T18:27:30.272Z",
+	"totalFail": 0,
+	"results": [
+		{
+			"id": "efe64142-74a5-4cda-a3e7-0bc4875c6d32",
+			"name": "00 · Preparación: crear contrato vigente [201]",
+			"url": "http://localhost:8083/contratos",
+			"time": 344,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"HTTP 201 - contrato preparado": true,
+				"Contrato creado con ID y Location": true
+			},
+			"testPassFailCounts": {
+				"HTTP 201 - contrato preparado": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Contrato creado con ID y Location": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				344
+			],
+			"allTests": [
+				{
+					"HTTP 201 - contrato preparado": true,
+					"Contrato creado con ID y Location": true
+				}
+			]
+		},
+		{
+			"id": "66043c22-7138-4dc3-9463-c14544c1eb7d",
+			"name": "01 · Emitir factura mensual S01 [201]",
+			"url": "http://localhost:8083/facturas",
+			"time": 192,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"HTTP 201 - factura emitida": true,
+				"Factura mensual, PENDIENTE y por $350000": true,
+				"HATEOAS self/contrato; sin pago todavía": true
+			},
+			"testPassFailCounts": {
+				"HTTP 201 - factura emitida": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Factura mensual, PENDIENTE y por $350000": {
+					"pass": 1,
+					"fail": 0
+				},
+				"HATEOAS self/contrato; sin pago todavía": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				192
+			],
+			"allTests": [
+				{
+					"HTTP 201 - factura emitida": true,
+					"Factura mensual, PENDIENTE y por $350000": true,
+					"HATEOAS self/contrato; sin pago todavía": true
+				}
+			]
+		},
+		{
+			"id": "99489572-e8e2-4568-a82f-b72bad6d8bf1",
+			"name": "02 · Registrar pago completo S02 [201]",
+			"url": "http://localhost:8083/pagos",
+			"time": 60,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"HTTP 201 - pago registrado": true
+			},
+			"testPassFailCounts": {
+				"HTTP 201 - pago registrado": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				60
+			],
+			"allTests": [
+				{
+					"HTTP 201 - pago registrado": true
+				}
+			]
+		}
+	],
+	"count": 1,
+	"totalTime": 596,
+	"collection": {
+		"requests": [
+			{
+				"id": "efe64142-74a5-4cda-a3e7-0bc4875c6d32",
+				"method": "POST"
+			},
+			{
+				"id": "66043c22-7138-4dc3-9463-c14544c1eb7d",
+				"method": "POST"
+			},
+			{
+				"id": "99489572-e8e2-4568-a82f-b72bad6d8bf1",
+				"method": "POST"
+			}
+		]
+	}
+}

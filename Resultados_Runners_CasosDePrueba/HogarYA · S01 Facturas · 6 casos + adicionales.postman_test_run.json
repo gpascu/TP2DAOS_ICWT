@@ -1,0 +1,661 @@
+{
+	"id": "43f42c8f-15cd-43cd-901a-265630b81b77",
+	"name": "HogarYA · S01 Facturas · 6 casos + adicionales",
+	"timestamp": "2026-11-26T17:30:58.281Z",
+	"collection_id": "60341335-a76e3d2f-173d-472d-8d10-072fee96bf95",
+	"folder_id": 0,
+	"environment_id": "0",
+	"totalPass": 44,
+	"delay": 0,
+	"persist": true,
+	"status": "finished",
+	"startedAt": "2026-11-26T17:30:55.035Z",
+	"totalFail": 0,
+	"results": [
+		{
+			"id": "f36db6af-571b-4afc-b195-2e5735fadf76",
+			"name": "00 - Crear contrato de prueba",
+			"url": "http://localhost:8083/contratos",
+			"time": 611,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"HTTP 201": true,
+				"Location de contrato con ID": true,
+				"Cuerpo con self link": true
+			},
+			"testPassFailCounts": {
+				"HTTP 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Location de contrato con ID": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Cuerpo con self link": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				611
+			],
+			"allTests": [
+				{
+					"HTTP 201": true,
+					"Location de contrato con ID": true,
+					"Cuerpo con self link": true
+				}
+			]
+		},
+		{
+			"id": "8b7f5c3f-80f1-4703-8ea2-0fd8bf369d42",
+			"name": "01 - Alta exitosa de factura mensual",
+			"url": "http://localhost:8083/facturas",
+			"time": 250,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"HTTP 201": true,
+				"Location de factura con ID": true,
+				"Datos de la factura mensual autocompletados": true,
+				"Emision de hoy y vencimiento dentro del periodo": true,
+				"Links self y contrato": true,
+				"Sin link de pago": true
+			},
+			"testPassFailCounts": {
+				"HTTP 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Location de factura con ID": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Datos de la factura mensual autocompletados": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Emision de hoy y vencimiento dentro del periodo": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Links self y contrato": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Sin link de pago": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				250
+			],
+			"allTests": [
+				{
+					"HTTP 201": true,
+					"Location de factura con ID": true,
+					"Datos de la factura mensual autocompletados": true,
+					"Emision de hoy y vencimiento dentro del periodo": true,
+					"Links self y contrato": true,
+					"Sin link de pago": true
+				}
+			]
+		},
+		{
+			"id": "eef212ac-7be8-476e-b5f5-bbf83f15e164",
+			"name": "02 - Consulta de factura por ID",
+			"url": "http://localhost:8083/facturas/1",
+			"time": 42,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"ID consultado coincide": true,
+				"Datos persistidos": true,
+				"Links self y contrato": true,
+				"Sin pago asociado": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"ID consultado coincide": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Datos persistidos": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Links self y contrato": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Sin pago asociado": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				42
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"ID consultado coincide": true,
+					"Datos persistidos": true,
+					"Links self y contrato": true,
+					"Sin pago asociado": true
+				}
+			]
+		},
+		{
+			"id": "92edaca9-ab69-41a8-8cd0-c7ac26b195c3",
+			"name": "03 - Listado con filtros",
+			"url": "http://localhost:8083/facturas?contratoId=4&periodo=2026-12&estado=PENDIENTE",
+			"time": 73,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Listado HAL con self": true,
+				"Self conserva los filtros": true,
+				"Contiene la factura creada": true,
+				"Cada factura tiene self": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Listado HAL con self": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Self conserva los filtros": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Contiene la factura creada": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Cada factura tiene self": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				73
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Listado HAL con self": true,
+					"Self conserva los filtros": true,
+					"Contiene la factura creada": true,
+					"Cada factura tiene self": true
+				}
+			]
+		},
+		{
+			"id": "752d9273-d9b6-4de9-baaa-6cbb0a213a70",
+			"name": "04 - Datos invalidos: periodo con formato incorrecto",
+			"url": "http://localhost:8083/facturas",
+			"time": 15,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"HTTP 400": true,
+				"Devuelve errores de validacion": true
+			},
+			"testPassFailCounts": {
+				"HTTP 400": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Devuelve errores de validacion": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				15
+			],
+			"allTests": [
+				{
+					"HTTP 400": true,
+					"Devuelve errores de validacion": true
+				}
+			]
+		},
+		{
+			"id": "e7df9eef-764e-4d2a-a9c7-6968a6348d33",
+			"name": "05 - Recurso relacionado inexistente: contrato",
+			"url": "http://localhost:8083/facturas",
+			"time": 25,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"HTTP 404": true
+			},
+			"testPassFailCounts": {
+				"HTTP 404": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				25
+			],
+			"allTests": [
+				{
+					"HTTP 404": true
+				}
+			]
+		},
+		{
+			"id": "7f25cf55-ab9f-4437-b150-cb3225a95afe",
+			"name": "06 - Conflicto: factura mensual duplicada",
+			"url": "http://localhost:8083/facturas",
+			"time": 33,
+			"responseCode": {
+				"code": 409,
+				"name": "Conflict"
+			},
+			"tests": {
+				"HTTP 409": true
+			},
+			"testPassFailCounts": {
+				"HTTP 409": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				33
+			],
+			"allTests": [
+				{
+					"HTTP 409": true
+				}
+			]
+		},
+		{
+			"id": "1e67dee1-887d-4ed4-8355-50ce6e11fbea",
+			"name": "07a - Anular la factura pendiente",
+			"url": "http://localhost:8083/facturas/1/estado",
+			"time": 86,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Estado ANULADA en la respuesta": true,
+				"La respuesta conserva el self": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Estado ANULADA en la respuesta": {
+					"pass": 1,
+					"fail": 0
+				},
+				"La respuesta conserva el self": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				86
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Estado ANULADA en la respuesta": true,
+					"La respuesta conserva el self": true
+				}
+			]
+		},
+		{
+			"id": "64be93f3-f59a-4d5a-b3ca-1d5f04590007",
+			"name": "07b - Reemitir la factura mensual",
+			"url": "http://localhost:8083/facturas",
+			"time": 44,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"HTTP 201": true,
+				"Location de la nueva factura": true,
+				"Es una factura distinta": true,
+				"La nueva factura esta pendiente": true
+			},
+			"testPassFailCounts": {
+				"HTTP 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Location de la nueva factura": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Es una factura distinta": {
+					"pass": 1,
+					"fail": 0
+				},
+				"La nueva factura esta pendiente": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				44
+			],
+			"allTests": [
+				{
+					"HTTP 201": true,
+					"Location de la nueva factura": true,
+					"Es una factura distinta": true,
+					"La nueva factura esta pendiente": true
+				}
+			]
+		},
+		{
+			"id": "0653d878-4f97-487f-900d-d360e531ad48",
+			"name": "07c - Verificar que la factura original quedo ANULADA",
+			"url": "http://localhost:8083/facturas/1",
+			"time": 34,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Estado ANULADA conservado": true,
+				"Sin pago": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Estado ANULADA conservado": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Sin pago": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				34
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Estado ANULADA conservado": true,
+					"Sin pago": true
+				}
+			]
+		},
+		{
+			"id": "5df46870-765f-4bc9-be36-9da0b7decd02",
+			"name": "07d - Verificar el periodo con dos facturas",
+			"url": "http://localhost:8083/facturas?contratoId=4&periodo=2026-12",
+			"time": 43,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Hay dos facturas del periodo: anulada y reemitida": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Hay dos facturas del periodo: anulada y reemitida": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				43
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Hay dos facturas del periodo: anulada y reemitida": true
+				}
+			]
+		},
+		{
+			"id": "c09d4caf-9127-4553-a943-bf4f4cdb99f8",
+			"name": "07e - Anular una factura ya anulada",
+			"url": "http://localhost:8083/facturas/1/estado",
+			"time": 22,
+			"responseCode": {
+				"code": 409,
+				"name": "Conflict"
+			},
+			"tests": {
+				"HTTP 409": true
+			},
+			"testPassFailCounts": {
+				"HTTP 409": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				22
+			],
+			"allTests": [
+				{
+					"HTTP 409": true
+				}
+			]
+		},
+		{
+			"id": "c57f6ce5-12a9-41dd-9435-b257b14a7b58",
+			"name": "08a - Crear contrato con vencimiento dia 31",
+			"url": "http://localhost:8083/contratos",
+			"time": 23,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"HTTP 201": true,
+				"Location de contrato con ID": true
+			},
+			"testPassFailCounts": {
+				"HTTP 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Location de contrato con ID": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				23
+			],
+			"allTests": [
+				{
+					"HTTP 201": true,
+					"Location de contrato con ID": true
+				}
+			]
+		},
+		{
+			"id": "b186fa0f-a499-442f-adf3-f6026657e650",
+			"name": "08b - Emitir factura de febrero y validar ultimo dia",
+			"url": "http://localhost:8083/facturas",
+			"time": 45,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"HTTP 201": true,
+				"Vencimiento en el ultimo dia de febrero": true,
+				"Tipo MENSUAL": true
+			},
+			"testPassFailCounts": {
+				"HTTP 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Vencimiento en el ultimo dia de febrero": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Tipo MENSUAL": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				45
+			],
+			"allTests": [
+				{
+					"HTTP 201": true,
+					"Vencimiento en el ultimo dia de febrero": true,
+					"Tipo MENSUAL": true
+				}
+			]
+		},
+		{
+			"id": "a9b5d6c9-9e77-4c4e-8ffc-8a28d2b38e7c",
+			"name": "08c - Consultar la factura de febrero",
+			"url": "http://localhost:8083/facturas/3",
+			"time": 31,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Vencimiento persistido en el ultimo dia": true,
+				"Periodo correcto": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Vencimiento persistido en el ultimo dia": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Periodo correcto": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				31
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Vencimiento persistido en el ultimo dia": true,
+					"Periodo correcto": true
+				}
+			]
+		}
+	],
+	"count": 1,
+	"totalTime": 1377,
+	"collection": {
+		"requests": [
+			{
+				"id": "f36db6af-571b-4afc-b195-2e5735fadf76",
+				"method": "POST"
+			},
+			{
+				"id": "8b7f5c3f-80f1-4703-8ea2-0fd8bf369d42",
+				"method": "POST"
+			},
+			{
+				"id": "eef212ac-7be8-476e-b5f5-bbf83f15e164",
+				"method": "GET"
+			},
+			{
+				"id": "92edaca9-ab69-41a8-8cd0-c7ac26b195c3",
+				"method": "GET"
+			},
+			{
+				"id": "752d9273-d9b6-4de9-baaa-6cbb0a213a70",
+				"method": "POST"
+			},
+			{
+				"id": "e7df9eef-764e-4d2a-a9c7-6968a6348d33",
+				"method": "POST"
+			},
+			{
+				"id": "7f25cf55-ab9f-4437-b150-cb3225a95afe",
+				"method": "POST"
+			},
+			{
+				"id": "1e67dee1-887d-4ed4-8355-50ce6e11fbea",
+				"method": "PATCH"
+			},
+			{
+				"id": "64be93f3-f59a-4d5a-b3ca-1d5f04590007",
+				"method": "POST"
+			},
+			{
+				"id": "0653d878-4f97-487f-900d-d360e531ad48",
+				"method": "GET"
+			},
+			{
+				"id": "5df46870-765f-4bc9-be36-9da0b7decd02",
+				"method": "GET"
+			},
+			{
+				"id": "c09d4caf-9127-4553-a943-bf4f4cdb99f8",
+				"method": "PATCH"
+			},
+			{
+				"id": "c57f6ce5-12a9-41dd-9435-b257b14a7b58",
+				"method": "POST"
+			},
+			{
+				"id": "b186fa0f-a499-442f-adf3-f6026657e650",
+				"method": "POST"
+			},
+			{
+				"id": "a9b5d6c9-9e77-4c4e-8ffc-8a28d2b38e7c",
+				"method": "GET"
+			}
+		]
+	}
+}

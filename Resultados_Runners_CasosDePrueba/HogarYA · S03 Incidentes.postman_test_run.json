@@ -1,0 +1,849 @@
+{
+	"id": "97a8908e-a611-49bc-87ff-a65a5c2026ff",
+	"name": "HogarYA · S03 Incidentes",
+	"timestamp": "2026-11-26T17:43:53.097Z",
+	"collection_id": "60341335-5009dbd6-50c1-4492-9d4e-5cdea4637ab3",
+	"folder_id": 0,
+	"environment_id": "0",
+	"totalPass": 42,
+	"delay": 0,
+	"persist": true,
+	"status": "finished",
+	"startedAt": "2026-11-26T17:43:50.431Z",
+	"totalFail": 0,
+	"results": [
+		{
+			"id": "3418cbe4-b165-4610-8e9b-6052418d1806",
+			"name": "Preparación 1. Crear contrato vigente",
+			"url": "http://localhost:8083/contratos",
+			"time": 26,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"HTTP 201": true,
+				"Location contiene el ID del contrato": true
+			},
+			"testPassFailCounts": {
+				"HTTP 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Location contiene el ID del contrato": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				26
+			],
+			"allTests": [
+				{
+					"HTTP 201": true,
+					"Location contiene el ID del contrato": true
+				}
+			]
+		},
+		{
+			"id": "f09c2552-b6ca-4074-8318-c0a04c217f9e",
+			"name": "Preparación 2. Crear contrato activo vencido",
+			"url": "http://localhost:8083/contratos",
+			"time": 31,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"HTTP 201": true,
+				"Location contiene el ID del contrato": true
+			},
+			"testPassFailCounts": {
+				"HTTP 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Location contiene el ID del contrato": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				31
+			],
+			"allTests": [
+				{
+					"HTTP 201": true,
+					"Location contiene el ID del contrato": true
+				}
+			]
+		},
+		{
+			"id": "c82aa2f8-a06f-4fee-990b-202d20513738",
+			"name": "01. Alta de incidente",
+			"url": "http://localhost:8083/incidentes",
+			"time": 197,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"HTTP 201": true,
+				"Incidente abierto y con fecha": true,
+				"Location apunta al incidente": true
+			},
+			"testPassFailCounts": {
+				"HTTP 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Incidente abierto y con fecha": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Location apunta al incidente": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				197
+			],
+			"allTests": [
+				{
+					"HTTP 201": true,
+					"Incidente abierto y con fecha": true,
+					"Location apunta al incidente": true
+				}
+			]
+		},
+		{
+			"id": "6007a71c-3025-4394-a061-041654d7c4dc",
+			"name": "02. Consulta por ID",
+			"url": "http://localhost:8083/incidentes/1",
+			"time": 47,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Es el incidente creado": true,
+				"Tiene los enlaces de detalle": true,
+				"El enlace a informes filtra por este incidente": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Es el incidente creado": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Tiene los enlaces de detalle": {
+					"pass": 1,
+					"fail": 0
+				},
+				"El enlace a informes filtra por este incidente": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				47
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Es el incidente creado": true,
+					"Tiene los enlaces de detalle": true,
+					"El enlace a informes filtra por este incidente": true
+				}
+			]
+		},
+		{
+			"id": "50928dcb-b57f-441a-92fb-5a9818093a3c",
+			"name": "03. Listado filtrado",
+			"url": "http://localhost:8083/incidentes?contratoId=6&estado=ABIERTO&categoria=PLOMERIA&prioridad=MEDIA",
+			"time": 61,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Incluye el incidente creado": true,
+				"Todos cumplen los filtros": true,
+				"Self conserva los filtros": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Incluye el incidente creado": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Todos cumplen los filtros": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Self conserva los filtros": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				61
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Incluye el incidente creado": true,
+					"Todos cumplen los filtros": true,
+					"Self conserva los filtros": true
+				}
+			]
+		},
+		{
+			"id": "94527de3-8a21-41bd-bf23-7ac6addd7676",
+			"name": "04. Datos obligatorios inválidos",
+			"url": "http://localhost:8083/incidentes",
+			"time": 38,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"HTTP 400": true
+			},
+			"testPassFailCounts": {
+				"HTTP 400": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				38
+			],
+			"allTests": [
+				{
+					"HTTP 400": true
+				}
+			]
+		},
+		{
+			"id": "8a9e910d-6ced-4b2f-9185-969ec7bb38d9",
+			"name": "05. Incidente inexistente",
+			"url": "http://localhost:8083/incidentes/999999999",
+			"time": 16,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"HTTP 404": true
+			},
+			"testPassFailCounts": {
+				"HTTP 404": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				16
+			],
+			"allTests": [
+				{
+					"HTTP 404": true
+				}
+			]
+		},
+		{
+			"id": "8b6e6232-b1a0-40c9-a2bb-cdbee65c2fb3",
+			"name": "06. Contrato vencido",
+			"url": "http://localhost:8083/incidentes",
+			"time": 18,
+			"responseCode": {
+				"code": 409,
+				"name": "Conflict"
+			},
+			"tests": {
+				"HTTP 409": true
+			},
+			"testPassFailCounts": {
+				"HTTP 409": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				18
+			],
+			"allTests": [
+				{
+					"HTTP 409": true
+				}
+			]
+		},
+		{
+			"id": "7a0bb71b-3d17-45a4-8b6d-b1d20f2a4a5f",
+			"name": "07. Historial del alta",
+			"url": "http://localhost:8083/incidentes/1/historial",
+			"time": 30,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Una sola entrada de alta": true,
+				"Coincide con la fecha de alta": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Una sola entrada de alta": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Coincide con la fecha de alta": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				30
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Una sola entrada de alta": true,
+					"Coincide con la fecha de alta": true
+				}
+			]
+		},
+		{
+			"id": "56872453-33a2-433b-9005-07dffe6d705f",
+			"name": "08. Iniciar atención",
+			"url": "http://localhost:8083/incidentes/1/estado",
+			"time": 71,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Quedó en proceso": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Quedó en proceso": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				71
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Quedó en proceso": true
+				}
+			]
+		},
+		{
+			"id": "5ccc195d-b5c5-4814-9040-7247a2b65e47",
+			"name": "09. Rechazar resolución desde S03",
+			"url": "http://localhost:8083/incidentes/1/estado",
+			"time": 16,
+			"responseCode": {
+				"code": 409,
+				"name": "Conflict"
+			},
+			"tests": {
+				"HTTP 409": true
+			},
+			"testPassFailCounts": {
+				"HTTP 409": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				16
+			],
+			"allTests": [
+				{
+					"HTTP 409": true
+				}
+			]
+		},
+		{
+			"id": "e8750ae7-e592-4651-a6c9-5c1a9b7a124b",
+			"name": "10. Verificar que el rechazo no dejó cambios",
+			"url": "http://localhost:8083/incidentes/1/historial",
+			"time": 18,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Solo hay alta e inicio": true,
+				"El historial está ordenado": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Solo hay alta e inicio": {
+					"pass": 1,
+					"fail": 0
+				},
+				"El historial está ordenado": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				18
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Solo hay alta e inicio": true,
+					"El historial está ordenado": true
+				}
+			]
+		},
+		{
+			"id": "55497b4f-e389-4217-98d4-8743d6a911b3",
+			"name": "11. Verificar estado tras el rechazo",
+			"url": "http://localhost:8083/incidentes/1",
+			"time": 12,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"El estado no cambió": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"El estado no cambió": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				12
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"El estado no cambió": true
+				}
+			]
+		},
+		{
+			"id": "84e453d4-497b-43c4-9916-eecd4e1d142c",
+			"name": "12. Cancelar",
+			"url": "http://localhost:8083/incidentes/1/estado",
+			"time": 33,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Quedó cancelado": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Quedó cancelado": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				33
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Quedó cancelado": true
+				}
+			]
+		},
+		{
+			"id": "576ce5aa-614a-4d51-a4fb-beef89ec1f17",
+			"name": "13. Cancelado es terminal",
+			"url": "http://localhost:8083/incidentes/1/estado",
+			"time": 15,
+			"responseCode": {
+				"code": 409,
+				"name": "Conflict"
+			},
+			"tests": {
+				"HTTP 409": true
+			},
+			"testPassFailCounts": {
+				"HTTP 409": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				15
+			],
+			"allTests": [
+				{
+					"HTTP 409": true
+				}
+			]
+		},
+		{
+			"id": "f50a2493-19ca-4e4a-b822-b4bd2a0431b3",
+			"name": "14. Contrato inexistente",
+			"url": "http://localhost:8083/incidentes",
+			"time": 21,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"HTTP 404": true
+			},
+			"testPassFailCounts": {
+				"HTTP 404": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				21
+			],
+			"allTests": [
+				{
+					"HTTP 404": true
+				}
+			]
+		},
+		{
+			"id": "4907d529-800e-4228-a98c-46ed936c55f7",
+			"name": "15. Estado desconocido",
+			"url": "http://localhost:8083/incidentes/1/estado",
+			"time": 10,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"HTTP 400": true
+			},
+			"testPassFailCounts": {
+				"HTTP 400": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				10
+			],
+			"allTests": [
+				{
+					"HTTP 400": true
+				}
+			]
+		},
+		{
+			"id": "e9f21f3b-0bf6-4cdf-91d0-95cf22dff082",
+			"name": "16. Verificar cantidad de altas",
+			"url": "http://localhost:8083/incidentes?contratoId=6",
+			"time": 19,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"Hay una sola alta": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Hay una sola alta": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				19
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"Hay una sola alta": true
+				}
+			]
+		},
+		{
+			"id": "57c9b3a2-1e06-4f27-820b-49fc38fd731d",
+			"name": "17. Verificar que el contrato vencido no tiene altas",
+			"url": "http://localhost:8083/incidentes?contratoId=7",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true,
+				"El listado está vacío": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"El listado está vacío": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 200": true,
+					"El listado está vacío": true
+				}
+			]
+		},
+		{
+			"id": "483fc32e-d015-4a26-8271-a08c36e361ef",
+			"name": "18. Rechazar un ID de contrato decimal",
+			"url": "http://localhost:8083/incidentes",
+			"time": 12,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"HTTP 400": true
+			},
+			"testPassFailCounts": {
+				"HTTP 400": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				12
+			],
+			"allTests": [
+				{
+					"HTTP 400": true
+				}
+			]
+		},
+		{
+			"id": "234e2ae3-c59c-458e-a615-f336ffbc0359",
+			"name": "19. Rechazar un título numérico",
+			"url": "http://localhost:8083/incidentes",
+			"time": 5,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"HTTP 400": true
+			},
+			"testPassFailCounts": {
+				"HTTP 400": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				5
+			],
+			"allTests": [
+				{
+					"HTTP 400": true
+				}
+			]
+		},
+		{
+			"id": "8e5e527b-ce7f-446e-b1fc-89c4401a214c",
+			"name": "20. Rechazar una descripción booleana",
+			"url": "http://localhost:8083/incidentes",
+			"time": 11,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"HTTP 400": true
+			},
+			"testPassFailCounts": {
+				"HTTP 400": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				11
+			],
+			"allTests": [
+				{
+					"HTTP 400": true
+				}
+			]
+		},
+		{
+			"id": "9e9af8b5-5eac-4f52-850f-67aebffbe40b",
+			"name": "21. Rechazar un estado numérico",
+			"url": "http://localhost:8083/incidentes/1/estado",
+			"time": 9,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"HTTP 400": true
+			},
+			"testPassFailCounts": {
+				"HTTP 400": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				9
+			],
+			"allTests": [
+				{
+					"HTTP 400": true
+				}
+			]
+		}
+	],
+	"count": 1,
+	"totalTime": 733,
+	"collection": {
+		"requests": [
+			{
+				"id": "3418cbe4-b165-4610-8e9b-6052418d1806",
+				"method": "POST"
+			},
+			{
+				"id": "f09c2552-b6ca-4074-8318-c0a04c217f9e",
+				"method": "POST"
+			},
+			{
+				"id": "c82aa2f8-a06f-4fee-990b-202d20513738",
+				"method": "POST"
+			},
+			{
+				"id": "6007a71c-3025-4394-a061-041654d7c4dc",
+				"method": "GET"
+			},
+			{
+				"id": "50928dcb-b57f-441a-92fb-5a9818093a3c",
+				"method": "GET"
+			},
+			{
+				"id": "94527de3-8a21-41bd-bf23-7ac6addd7676",
+				"method": "POST"
+			},
+			{
+				"id": "8a9e910d-6ced-4b2f-9185-969ec7bb38d9",
+				"method": "GET"
+			},
+			{
+				"id": "8b6e6232-b1a0-40c9-a2bb-cdbee65c2fb3",
+				"method": "POST"
+			},
+			{
+				"id": "7a0bb71b-3d17-45a4-8b6d-b1d20f2a4a5f",
+				"method": "GET"
+			},
+			{
+				"id": "56872453-33a2-433b-9005-07dffe6d705f",
+				"method": "PATCH"
+			},
+			{
+				"id": "5ccc195d-b5c5-4814-9040-7247a2b65e47",
+				"method": "PATCH"
+			},
+			{
+				"id": "e8750ae7-e592-4651-a6c9-5c1a9b7a124b",
+				"method": "GET"
+			},
+			{
+				"id": "55497b4f-e389-4217-98d4-8743d6a911b3",
+				"method": "GET"
+			},
+			{
+				"id": "84e453d4-497b-43c4-9916-eecd4e1d142c",
+				"method": "PATCH"
+			},
+			{
+				"id": "576ce5aa-614a-4d51-a4fb-beef89ec1f17",
+				"method": "PATCH"
+			},
+			{
+				"id": "f50a2493-19ca-4e4a-b822-b4bd2a0431b3",
+				"method": "POST"
+			},
+			{
+				"id": "4907d529-800e-4228-a98c-46ed936c55f7",
+				"method": "PATCH"
+			},
+			{
+				"id": "e9f21f3b-0bf6-4cdf-91d0-95cf22dff082",
+				"method": "GET"
+			},
+			{
+				"id": "57c9b3a2-1e06-4f27-820b-49fc38fd731d",
+				"method": "GET"
+			},
+			{
+				"id": "483fc32e-d015-4a26-8271-a08c36e361ef",
+				"method": "POST"
+			},
+			{
+				"id": "234e2ae3-c59c-458e-a615-f336ffbc0359",
+				"method": "POST"
+			},
+			{
+				"id": "8e5e527b-ce7f-446e-b1fc-89c4401a214c",
+				"method": "POST"
+			},
+			{
+				"id": "9e9af8b5-5eac-4f52-850f-67aebffbe40b",
+				"method": "PATCH"
+			}
+		]
+	}
+}

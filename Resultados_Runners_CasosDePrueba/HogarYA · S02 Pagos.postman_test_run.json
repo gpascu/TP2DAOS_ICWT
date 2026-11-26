@@ -1,0 +1,230 @@
+{
+	"id": "96c61a87-e64b-4b96-8255-68928ecaa6e4",
+	"name": "HogarYA · S02 Pagos",
+	"timestamp": "2026-11-26T17:42:29.505Z",
+	"collection_id": "60341335-c2e15d52-4474-49ba-95f5-077e7c568bca",
+	"folder_id": 0,
+	"environment_id": "0",
+	"totalPass": 6,
+	"delay": 0,
+	"persist": true,
+	"status": "finished",
+	"startedAt": "2026-11-26T17:42:28.398Z",
+	"totalFail": 0,
+	"results": [
+		{
+			"id": "239c0d0f-64ff-4c12-a433-d8ecb760585b",
+			"name": "Preparacion",
+			"url": "http://localhost:8083/facturas",
+			"time": 33,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				33
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "35089421-4540-48f7-af16-8720fc43d8b9",
+			"name": "Caso 1: pago exitoso",
+			"url": "http://localhost:8083/pagos",
+			"time": 54,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"HTTP 201": true
+			},
+			"testPassFailCounts": {
+				"HTTP 201": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				54
+			],
+			"allTests": [
+				{
+					"HTTP 201": true
+				}
+			]
+		},
+		{
+			"id": "f5cc78b7-0c6f-4b0e-a12c-2d4dc06c297b",
+			"name": "Caso 2: consulta por id",
+			"url": "http://localhost:8083/pagos/1",
+			"time": 25,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				25
+			],
+			"allTests": [
+				{
+					"HTTP 200": true
+				}
+			]
+		},
+		{
+			"id": "933e685a-100c-4386-8098-3687910898be",
+			"name": "Caso 3: listado con filtro",
+			"url": "http://localhost:8083/pagos?facturaId=4",
+			"time": 36,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP 200": true
+			},
+			"testPassFailCounts": {
+				"HTTP 200": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				36
+			],
+			"allTests": [
+				{
+					"HTTP 200": true
+				}
+			]
+		},
+		{
+			"id": "4df4b114-4782-437b-ab42-f4f9b45a381e",
+			"name": "Caso 4: datos inválidos",
+			"url": "http://localhost:8083/pagos",
+			"time": 8,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"HTTP 400": true
+			},
+			"testPassFailCounts": {
+				"HTTP 400": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				8
+			],
+			"allTests": [
+				{
+					"HTTP 400": true
+				}
+			]
+		},
+		{
+			"id": "c9610cf2-76e6-4940-90ab-8a6b85555418",
+			"name": "Caso 5: recurso inexistente",
+			"url": "http://localhost:8083/pagos",
+			"time": 17,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"HTTP 404": true
+			},
+			"testPassFailCounts": {
+				"HTTP 404": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP 404": true
+				}
+			]
+		},
+		{
+			"id": "3d973da0-14b7-41ab-ad76-7eeb1a8263c7",
+			"name": "Caso 6: conflicto de negocio",
+			"url": "http://localhost:8083/pagos",
+			"time": 18,
+			"responseCode": {
+				"code": 409,
+				"name": "Conflict"
+			},
+			"tests": {
+				"HTTP 409": true
+			},
+			"testPassFailCounts": {
+				"HTTP 409": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				18
+			],
+			"allTests": [
+				{
+					"HTTP 409": true
+				}
+			]
+		}
+	],
+	"count": 1,
+	"totalTime": 191,
+	"collection": {
+		"requests": [
+			{
+				"id": "239c0d0f-64ff-4c12-a433-d8ecb760585b",
+				"method": "POST"
+			},
+			{
+				"id": "35089421-4540-48f7-af16-8720fc43d8b9",
+				"method": "POST"
+			},
+			{
+				"id": "f5cc78b7-0c6f-4b0e-a12c-2d4dc06c297b",
+				"method": "GET"
+			},
+			{
+				"id": "933e685a-100c-4386-8098-3687910898be",
+				"method": "GET"
+			},
+			{
+				"id": "4df4b114-4782-437b-ab42-f4f9b45a381e",
+				"method": "POST"
+			},
+			{
+				"id": "c9610cf2-76e6-4940-90ab-8a6b85555418",
+				"method": "POST"
+			},
+			{
+				"id": "3d973da0-14b7-41ab-ad76-7eeb1a8263c7",
+				"method": "POST"
+			}
+		]
+	}
+}

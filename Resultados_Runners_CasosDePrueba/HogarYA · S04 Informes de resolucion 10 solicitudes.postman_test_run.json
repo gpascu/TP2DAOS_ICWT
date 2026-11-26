@@ -1,0 +1,380 @@
+{
+	"id": "c2ecb373-0382-4362-8962-3cac8db651b9",
+	"name": "HogarYA · S04 Informes de resolucion 10 solicitudes",
+	"timestamp": "2026-11-26T17:46:35.106Z",
+	"collection_id": "60341335-b95b4de5-e6e8-4b78-b874-c85b6ef52663",
+	"folder_id": 0,
+	"environment_id": "0",
+	"totalPass": 18,
+	"delay": 0,
+	"persist": true,
+	"status": "finished",
+	"startedAt": "2026-11-26T17:46:33.905Z",
+	"totalFail": 0,
+	"results": [
+		{
+			"id": "c23dfb4b-1d94-492b-8d88-e37bfb6ca946",
+			"name": "01 Preparar contrato [201]",
+			"url": "http://localhost:8083/contratos",
+			"time": 20,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"HTTP esperado: 201": true,
+				"ID generado": true
+			},
+			"testPassFailCounts": {
+				"HTTP esperado: 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"ID generado": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				20
+			],
+			"allTests": [
+				{
+					"HTTP esperado: 201": true,
+					"ID generado": true
+				}
+			]
+		},
+		{
+			"id": "eed5d8e8-d028-45df-ac94-e55957c4cc23",
+			"name": "02 Preparar incidente [201]",
+			"url": "http://localhost:8083/incidentes",
+			"time": 17,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"HTTP esperado: 201": true,
+				"ID generado": true
+			},
+			"testPassFailCounts": {
+				"HTTP esperado: 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"ID generado": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP esperado: 201": true,
+					"ID generado": true
+				}
+			]
+		},
+		{
+			"id": "eae37c4b-dc43-4504-8992-8abdf661573a",
+			"name": "03 Pasar a EN_PROCESO [200]",
+			"url": "http://localhost:8083/incidentes/2/estado",
+			"time": 22,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP esperado: 200": true
+			},
+			"testPassFailCounts": {
+				"HTTP esperado: 200": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				22
+			],
+			"allTests": [
+				{
+					"HTTP esperado: 200": true
+				}
+			]
+		},
+		{
+			"id": "4b98b3f1-ceb2-43a2-b661-b56c0366c115",
+			"name": "04 Dato invalido: costo negativo [400]",
+			"url": "http://localhost:8083/informes-resolucion",
+			"time": 73,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"HTTP esperado: 400": true
+			},
+			"testPassFailCounts": {
+				"HTTP esperado: 400": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				73
+			],
+			"allTests": [
+				{
+					"HTTP esperado: 400": true
+				}
+			]
+		},
+		{
+			"id": "ba6283af-bd9f-46d0-80cc-6652fc1e580d",
+			"name": "05 Recurso inexistente [404]",
+			"url": "http://localhost:8083/informes-resolucion",
+			"time": 14,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"HTTP esperado: 404": true
+			},
+			"testPassFailCounts": {
+				"HTTP esperado: 404": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				14
+			],
+			"allTests": [
+				{
+					"HTTP esperado: 404": true
+				}
+			]
+		},
+		{
+			"id": "64d7e579-6fd3-4a77-9905-3c3bbd62b4ad",
+			"name": "06 Crear informe y resolver [201]",
+			"url": "http://localhost:8083/informes-resolucion",
+			"time": 34,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"HTTP esperado: 201": true,
+				"ID generado": true
+			},
+			"testPassFailCounts": {
+				"HTTP esperado: 201": {
+					"pass": 1,
+					"fail": 0
+				},
+				"ID generado": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				34
+			],
+			"allTests": [
+				{
+					"HTTP esperado: 201": true,
+					"ID generado": true
+				}
+			]
+		},
+		{
+			"id": "1a6ef48d-f436-4dd3-941c-be179f69dec9",
+			"name": "07 Consultar informe por ID [200]",
+			"url": "http://localhost:8083/informes-resolucion/1",
+			"time": 12,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP esperado: 200": true,
+				"GET del informe correcto": true,
+				"Enlace HATEOAS self": true
+			},
+			"testPassFailCounts": {
+				"HTTP esperado: 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"GET del informe correcto": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Enlace HATEOAS self": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				12
+			],
+			"allTests": [
+				{
+					"HTTP esperado: 200": true,
+					"GET del informe correcto": true,
+					"Enlace HATEOAS self": true
+				}
+			]
+		},
+		{
+			"id": "8a76d118-05ca-43c5-8dc5-6fff4a34c7e0",
+			"name": "08 Conflicto: ya RESUELTO [409]",
+			"url": "http://localhost:8083/informes-resolucion",
+			"time": 17,
+			"responseCode": {
+				"code": 409,
+				"name": "Conflict"
+			},
+			"tests": {
+				"HTTP esperado: 409": true
+			},
+			"testPassFailCounts": {
+				"HTTP esperado: 409": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP esperado: 409": true
+				}
+			]
+		},
+		{
+			"id": "2da79a79-f2ac-4751-83ae-05cae16ad2b6",
+			"name": "09 Listar filtrado por incidente [200]",
+			"url": "http://localhost:8083/informes-resolucion?incidenteId=2",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP esperado: 200": true,
+				"Filtrado: solo el informe del incidente": true
+			},
+			"testPassFailCounts": {
+				"HTTP esperado: 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Filtrado: solo el informe del incidente": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"HTTP esperado: 200": true,
+					"Filtrado: solo el informe del incidente": true
+				}
+			]
+		},
+		{
+			"id": "7cef1f1e-72c1-4cd6-b64c-5975d03606bb",
+			"name": "10 Comprobar historial [200]",
+			"url": "http://localhost:8083/incidentes/2/historial",
+			"time": 23,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"HTTP esperado: 200": true,
+				"Historial: ABIERTO, EN_PROCESO, RESUELTO": true,
+				"Informe e historial con la misma fecha/hora": true
+			},
+			"testPassFailCounts": {
+				"HTTP esperado: 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Historial: ABIERTO, EN_PROCESO, RESUELTO": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Informe e historial con la misma fecha/hora": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				23
+			],
+			"allTests": [
+				{
+					"HTTP esperado: 200": true,
+					"Historial: ABIERTO, EN_PROCESO, RESUELTO": true,
+					"Informe e historial con la misma fecha/hora": true
+				}
+			]
+		}
+	],
+	"count": 1,
+	"totalTime": 249,
+	"collection": {
+		"requests": [
+			{
+				"id": "c23dfb4b-1d94-492b-8d88-e37bfb6ca946",
+				"method": "POST"
+			},
+			{
+				"id": "eed5d8e8-d028-45df-ac94-e55957c4cc23",
+				"method": "POST"
+			},
+			{
+				"id": "eae37c4b-dc43-4504-8992-8abdf661573a",
+				"method": "PATCH"
+			},
+			{
+				"id": "4b98b3f1-ceb2-43a2-b661-b56c0366c115",
+				"method": "POST"
+			},
+			{
+				"id": "ba6283af-bd9f-46d0-80cc-6652fc1e580d",
+				"method": "POST"
+			},
+			{
+				"id": "64d7e579-6fd3-4a77-9905-3c3bbd62b4ad",
+				"method": "POST"
+			},
+			{
+				"id": "1a6ef48d-f436-4dd3-941c-be179f69dec9",
+				"method": "GET"
+			},
+			{
+				"id": "8a76d118-05ca-43c5-8dc5-6fff4a34c7e0",
+				"method": "POST"
+			},
+			{
+				"id": "2da79a79-f2ac-4751-83ae-05cae16ad2b6",
+				"method": "GET"
+			},
+			{
+				"id": "7cef1f1e-72c1-4cd6-b64c-5975d03606bb",
+				"method": "GET"
+			}
+		]
+	}
+}
